@@ -2,22 +2,26 @@ import { useApp } from "../context/AppContext";
 import { T, FALLBACK_RESULTS } from "../data/translations";
 
 export default function StepPreferences() {
-  const { lang, strand, grades, interests, location, setLocation, budget, setBudget, setStep, setResults } = useApp();
+  const { lang, strand, bacStatus, strongSubjects, grades, interests, location, setLocation, budget, setBudget, setStep, setResults } = useApp();
   const t = T[lang];
 
   const handleSubmit = async () => {
     setStep("loading");
 
-    const gradesSummary = Object.entries(grades).map(([k, v]) => `${k}: ${v}`).join(", ");
+    const gradesSummary = bacStatus === "done"
+      ? Object.entries(grades).map(([k, v]) => `${k}: ${v}`).join(", ") || "Not provided"
+      : `Student has NOT yet taken BAC II. Strong/favourite subjects: ${strongSubjects.join(", ") || "not specified"}`;
+  
     const interestsList = interests.join(", ") || "general";
     const budgetLabel = { low: "$0–$500/year", medium: "$500–$1,500/year", high: "$1,500–$3,000/year", any: "no budget limit" }[budget] || "flexible";
     const strandLabel = { science: "Science", social: "Social Science" }[strand];
-
-    const prompt = `You are an academic advisor for Cambodian university students. A Grade 12 student just completed their BAC II exam.
+    
+    const prompt = `You are an academic advisor for Cambodian university students. A Grade 12 student is exploring their university options.
 
 Student Profile:
 - BAC II Strand: ${strandLabel}
-- Grades (A=Excellent, B=Good, C=Average, D=Below Average, E=Poor, F=Fail): ${gradesSummary}
+- BAC II Status: ${bacStatus === "done" ? "Completed" : "Not yet taken (still in school)"}
+- ${bacStatus === "done" ? `Grades (A=Excellent, B=Good, C=Average, D=Below Average, E=Poor, F=Fail): ${gradesSummary}` : `Strong subjects: ${gradesSummary}`}
 - Personal Interests: ${interestsList}
 - Location Preference: ${location || "any province"}
 - Annual Tuition Budget: ${budgetLabel}
@@ -55,7 +59,7 @@ Use REAL Cambodian universities: Royal University of Phnom Penh (RUPP), Royal Un
     } catch {
       setResults(FALLBACK_RESULTS);
     }
-    setStep(5);
+    setStep(6);
   };
 
   return (

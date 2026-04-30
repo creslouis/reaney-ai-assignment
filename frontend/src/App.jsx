@@ -2,6 +2,7 @@ import { AppProvider, useApp } from "./context/AppContext";
 import { Topbar, ProgressBar } from "./components/Nav";
 import Modal from "./components/Modal";
 import StepStrand from "./pages/StepStrand";
+import StepBacStatus from "./pages/StepBacStatus";
 import StepGrades from "./pages/StepGrades";
 import StepInterests from "./pages/StepInterests";
 import StepPreferences from "./pages/StepPreferences";
@@ -13,11 +14,12 @@ function Router() {
   return (
     <main className="main">
       {step === 1 && <StepStrand />}
-      {step === 2 && <StepGrades />}
-      {step === 3 && <StepInterests />}
-      {step === 4 && <StepPreferences />}
+      {step === 2 && <StepBacStatus />}
+      {step === 3 && <StepGrades />}
+      {step === 4 && <StepInterests />}
+      {step === 5 && <StepPreferences />}
       {step === "loading" && <StepLoading />}
-      {step === 5 && <StepResults />}
+      {step === 6 && <StepResults />}
     </main>
   );
 }

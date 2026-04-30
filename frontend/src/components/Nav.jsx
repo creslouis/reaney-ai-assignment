@@ -4,7 +4,7 @@ import { T } from "../data/translations";
 export function Topbar() {
   const { lang, setLang, step, setShowModal, results } = useApp();
   const t = T[lang];
-  const showSave = step === 5 && results.length > 0;
+  const showSave = step === 6 && results.length > 0;
 
   return (
     <nav className="topbar">
@@ -43,13 +43,14 @@ export function ProgressBar() {
 
   const steps = [
     { n: 1, label: t.stepStrand },
-    { n: 2, label: t.stepGrades },
-    { n: 3, label: t.stepInterests },
-    { n: 4, label: t.stepPrefs },
-    { n: 5, label: t.stepResults, dot: "✓" },
+    { n: 2, label: t.stepBacStatus },
+    { n: 3, label: t.stepGrades },
+    { n: 4, label: t.stepInterests },
+    { n: 5, label: t.stepPrefs },
+    { n: 6, label: t.stepResults, dot: "✓" },
   ];
 
-  const activeStep = step === "loading" ? 5 : step;
+  const activeStep = step === "loading" ? 6 : step;
 
   return (
     <div className="progress-bar">

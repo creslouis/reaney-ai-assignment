@@ -2,9 +2,19 @@ export const T = {
   km: {
     appName: "រៀនអី",
     login: "ចូល", register: "ចុះឈ្មោះ", saveResults: "💾 រក្សាលទ្ធផល",
-    stepStrand: "ផ្នែក", stepGrades: "និទ្ទេស", stepInterests: "ចំណាប់អារម្មណ៍", stepPrefs: "ចំណូលចិត្ត", stepResults: "លទ្ធផល",
+    stepStrand: "ផ្នែក", stepBacStatus: "ស្ថានភាព", stepGrades: "និទ្ទេស", stepInterests: "ចំណាប់អារម្មណ៍", stepPrefs: "ចំណូលចិត្ត", stepResults: "លទ្ធផល",
     s1Title: "តើអ្នកនៅក្នុងផ្នែកអ្វីនៃ BAC II?", s1Sub: "ជ្រើសរើសផ្នែកដែលអ្នករៀននៅថ្នាក់ទី១២",
     strandScience: "វិទ្យាសាស្ត្រ", strandSocial: "សង្គមវិទ្យា", nextGrades: "បន្ទាប់: បញ្ចូលថ្នាក់",
+        // Step 1.5 — BAC status
+    s1bTitle: "តើអ្នកបានប្រឡង BAC II រួចហើយឬនៅ?",
+    s1bSub: "ចម្លើយរបស់អ្នកនឹងជួយយើងតម្រង់ការណែនាំឱ្យស្រប",
+    bacDone: "បានប្រឡងរួចហើយ ✓", bacDoneSub: "ខ្ញុំមានលទ្ធផល BAC II ហើយ",
+    bacNotYet: "មិនទាន់ប្រឡង", bacNotYetSub: "ខ្ញុំនៅក្នុងថ្នាក់ទី១២ ឬខ្ពស់ជាងនេះ",
+    nextBacStatus: "បន្ទាប់",
+    // Step 3 — strong subjects (pre-bac)
+    s2PreTitle: "តើអ្នកខ្លាំងក្នុងមុខវិជ្ជាអ្វីខ្លះ?",
+    s2PreSub: "ជ្រើសរើសមុខវិជ្ជាដែលអ្នកមានទំនុកចិត្ត ឬចូលចិត្ត",
+    s2PreHint: "ជ្រើសរើសតាមច្រើនតាមដែលស្រប",
     s2Title: "បញ្ចូលនិទ្ទេស BAC II របស់អ្នក", s2Sub: "ជ្រើសរើស A–F សម្រាប់មុខវិជ្ជានីមួយៗ — A = ល្អបំផុត, F = ធ្លាក់",
     colSubject: "មុខវិជ្ជា", colGrade: "និទ្ទេស", nextInterests: "បន្ទាប់: ចំណាប់អារម្មណ៍",
     s3Title: "តើអ្នកចូលចិត្តអ្វី?", s3Sub: "ជ្រើសរើសរហូតដល់ ៥ ប្រធានបទដែលអ្នកចូលចិត្ត", nextPrefs: "បន្ទាប់: ចំណូលចិត្ត",
@@ -62,9 +72,19 @@ export const T = {
   en: {
     appName: "ReanEy",
     login: "Log in", register: "Sign up", saveResults: "💾 Save Results",
-    stepStrand: "Strand", stepGrades: "Grades", stepInterests: "Interests", stepPrefs: "Preferences", stepResults: "Results",
+    stepStrand: "Strand", stepBacStatus: "Status", stepGrades: "Grades", stepInterests: "Interests", stepPrefs: "Preferences", stepResults: "Results",
     s1Title: "What's your BAC II strand?", s1Sub: "Select the stream you studied in Grade 12",
     strandScience: "Science", strandSocial: "Social Science", nextGrades: "Next: Enter Grades",
+        // Step 1.5 — BAC status
+    s1bTitle: "Have you completed your BAC II exam?",
+    s1bSub: "Your answer helps us tailor the recommendations to your situation",
+    bacDone: "Yes, I'm done ✓", bacDoneSub: "I already have my BAC II results",
+    bacNotYet: "Not yet", bacNotYetSub: "I'm still in Grade 12 or preparing",
+    nextBacStatus: "Next",
+    // Step 3 — strong subjects (pre-bac)
+    s2PreTitle: "Which subjects are you strong in?",
+    s2PreSub: "Select the subjects you feel confident or enjoy the most",
+    s2PreHint: "Select as many as apply",
     s2Title: "Enter your BAC II grades", s2Sub: "Select A–F for each subject. A = Excellent, F = Fail",
     colSubject: "Subject", colGrade: "Grade", nextInterests: "Next: Interests",
     s3Title: "What are your interests?", s3Sub: "Pick up to 5 topics you enjoy or are curious about", nextPrefs: "Next: Preferences",

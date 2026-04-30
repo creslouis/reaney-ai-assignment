@@ -25,8 +25,8 @@ export default function StepInterests() {
       </div>
 
       <div className="step-nav">
-        <button className="btn-back" onClick={() => setStep(2)}>← {t.back}</button>
-        <button className="btn-next" onClick={() => setStep(4)}>{t.nextPrefs} →</button>
+        <button className="btn-back" onClick={() => setStep(3)}>← {t.back}</button>
+        <button className="btn-next" onClick={() => setStep(5)}>{t.nextPrefs} →</button>
       </div>
     </div>
   );
