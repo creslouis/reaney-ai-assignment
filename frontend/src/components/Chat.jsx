@@ -1,46 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { useApp } from "../context/AppContext";
 import { T } from "../data/translations";
-
-function buildSystemPrompt({ strand, grades, interests, location, budget, results }) {
-  const strandLabel = { science: "Science", social: "Social Science" }[strand] || "Unknown";
-  const gradesList = Object.entries(grades).map(([k, v]) => `${k}: ${v}`).join(", ") || "Not provided";
-  const interestsList = interests.join(", ") || "Not specified";
-  const budgetLabel = { low: "$0–$500/year (public/scholarship)", medium: "$500–$1,500/year", high: "$1,500–$3,000/year", any: "No budget limit" }[budget] || "Flexible";
-  const majorNames = results.map((r, i) => `#${i + 1}: ${r.major} (${r.match}% match)`).join("\n");
-  const uniList = results.flatMap((r) => (r.universities || []).map((u) => `${u.name} (${u.type}, ${u.tuition})`)).join(", ");
-
-  return `You are Sok, a friendly AI academic advisor for Cambodian Grade 12 students. You're like a smart older student — casual, warm, encouraging.
-
-Student profile:
-- BAC II Strand: ${strandLabel}
-- Grades: ${gradesList}
-- Interests: ${interestsList}
-- Location: ${location || "Any"}
-- Budget: ${budgetLabel}
-
-Their recommended majors (already shown):
-${majorNames}
-
-Relevant universities: ${uniList}
-
-Rules:
-1. Answer questions about their recommended majors
-2. Compare majors when asked
-3. Explain career paths in Cambodia
-4. Give advice on university applications (deadlines, documents, entrance exams)
-5. Be honest — if a major is tough given their grades, say so kindly
-6. Reply in the SAME language the student uses (English or Khmer). If they write Khmer, respond fully in Khmer.
-7. Keep replies concise — max 3–4 short paragraphs
-8. Use emojis naturally
-9. Never make up university fees — say "I'd recommend checking the university website to confirm"`;
-}
+import { apiFetch } from "../api";
 
 export default function Chat() {
-  const { lang, strand, grades, interests, location, budget, results } = useApp();
+  const { lang, results, studentId, sessionId } = useApp();
   const t = T[lang];
 
-  const topMajor = lang === "km" ? results[0]?.major_kh : results[0]?.major || "your top major";
   const welcome = t.chatWelcomeFn(lang === "km" ? (results[0]?.major_kh || results[0]?.major) : (results[0]?.major || "your top major"));
   
   const [messages, setMessages] = useState([{ role: "ai", text: welcome }]);
@@ -71,18 +37,22 @@ export default function Chat() {
     setTyping(true);
 
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          system: buildSystemPrompt({ strand, grades, interests, location, budget, results }),
-          messages: newHistory,
-        }),
-      });
-      const data = await res.json();
-      const reply = data.content?.map((b) => b.text || "").join("") || (lang === "km" ? "សូមអភ័យទោស! មានបញ្ហា។ សូមសាកម្ដងទៀត!" : "Sorry, something went wrong. Try again!");
+      let reply;
+      if (studentId && sessionId) {
+        const data = await apiFetch("/api/v1/chat/send", {
+          method: "POST",
+          body: JSON.stringify({
+            session_id: sessionId,
+            student_id: studentId,
+            message: text,
+          }),
+        });
+        reply = data.reply;
+      } else {
+        reply = lang === "km"
+          ? "សូមអភ័យទោស! លទ្ធផល backend មិនទាន់រួចរាល់ទេ។ សូមព្យាយាមម្ដងទៀត។"
+          : "Sorry, the backend session is not ready yet. Please try again.";
+      }
       setTyping(false);
       appendMsg("ai", reply);
       setHistory((prev) => [...prev, { role: "assistant", content: reply }]);

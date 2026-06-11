@@ -76,6 +76,26 @@ export default function ResultCard({ result, index, animDelay }) {
               ))}
             </div>
           </div>
+
+          {!!result.experience_insights?.length && (
+            <div className="experience-insights-section">
+              <div className="section-title">{t.realWorldAdviceTitle}</div>
+              <div className="experience-insight-list">
+                {result.experience_insights.map((entry, i) => (
+                  <div className="experience-insight-card" key={i}>
+                    <div className="experience-insight-meta">
+                      <span className="meta-chip">{entry.contributor_type || t.realWorldContributor}</span>
+                      {entry.university && <span className="meta-chip">{entry.university}</span>}
+                      {entry.job_title && <span className="meta-chip">{entry.job_title}</span>}
+                    </div>
+                    {entry.why_choose_text && <div className="why-text">{entry.why_choose_text}</div>}
+                    {entry.challenges_text && <div className="why-text-kh">{entry.challenges_text}</div>}
+                    {entry.advice_text && <div className="experience-advice">{t.realWorldAdviceLabel}: {entry.advice_text}</div>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

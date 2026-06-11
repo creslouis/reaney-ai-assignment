@@ -1,18 +1,35 @@
 import { useApp } from "../context/AppContext";
 import { T } from "../data/translations";
+import { NavLink, useLocation } from "react-router-dom";
+import { cmsSetting } from "../cms";
 
 export function Topbar() {
-  const { lang, setLang, step, setShowModal, results } = useApp();
+  const { lang, setLang, step, setShowModal, results, cmsBundle } = useApp();
   const t = T[lang];
   const showSave = step === 6 && results.length > 0;
+  const location = useLocation();
+  const branding = cmsSetting(cmsBundle, "branding.app", {});
+  const navCms = cmsSetting(cmsBundle, "navigation.labels", {});
+  const brandName = lang === "km" ? (branding.app_name_km || "រៀនអី") : (branding.app_name_en || "ReanEy");
+  const brandIcon = branding.brand_icon || "🎓";
 
   return (
     <nav className="topbar">
-      <div className="brand">
-        <div className="brand-icon">🎓</div>
+      <div className="brand-wrap">
+      <NavLink to="/" className="brand brand-link">
+        <div className="brand-icon">{brandIcon}</div>
         <div className="brand-name">
-          {lang === "km" ? "រៀន" : "Rean"}<span>{lang === "km" ? "អី" : "Ey"}</span>
+          {brandName}
         </div>
+      </NavLink>
+      <div className="top-links">
+        <NavLink to="/" className={({ isActive }) => `top-link${isActive ? " active" : ""}`}>{lang === "km" ? (navCms.student_km || t.navStudent) : (navCms.student_en || t.navStudent)}</NavLink>
+        <NavLink to="/experience" className={({ isActive }) => `top-link${isActive ? " active" : ""}`}>{lang === "km" ? (navCms.experience_km || t.navExperience) : (navCms.experience_en || t.navExperience)}</NavLink>
+        <NavLink to="/admin/experience" className={({ isActive }) => `top-link${isActive ? " active" : ""}`}>{t.navAdmin}</NavLink>
+        <NavLink to="/admin/ml" className={({ isActive }) => `top-link${isActive ? " active" : ""}`}>{t.navModel}</NavLink>
+        <NavLink to="/admin/universities" className={({ isActive }) => `top-link${isActive ? " active" : ""}`}>{t.navUniversity}</NavLink>
+        <NavLink to="/admin/cms" className={({ isActive }) => `top-link${isActive ? " active" : ""}`}>{t.navCms}</NavLink>
+      </div>
       </div>
 
       <div className="lang-toggle">
@@ -27,9 +44,9 @@ export function Topbar() {
       </div>
 
       <div className="auth-links">
-        <button className="btn-ghost" onClick={() => setShowModal("login")}>{t.login}</button>
-        <button className="btn-ghost" onClick={() => setShowModal("register")}>{t.register}</button>
-        {showSave && (
+        {location.pathname === "/" && <button className="btn-ghost" onClick={() => setShowModal("login")}>{t.login}</button>}
+        {location.pathname === "/" && <button className="btn-ghost" onClick={() => setShowModal("register")}>{t.register}</button>}
+        {location.pathname === "/" && showSave && (
           <button className="btn-save show" onClick={() => setShowModal("save")}>{t.saveResults}</button>
         )}
       </div>

@@ -1,4 +1,13 @@
-import { createContext, useContext, useState } from "react";
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useEffect, useState } from "react";
+import {
+  apiFetch,
+  authHeaders,
+  getStoredAdminToken,
+  getStoredRefreshToken,
+  setStoredAdminToken,
+  setStoredRefreshToken,
+} from "../api";
 
 const AppContext = createContext(null);
 
@@ -15,6 +24,85 @@ export function AppProvider({ children }) {
   const [location, setLocation] = useState("");
   const [budget, setBudget] = useState(null);
   const [results, setResults] = useState([]);
+  const [studentId, setStudentId] = useState(null);
+  const [sessionId, setSessionId] = useState(null);
+  const [geminiSummary, setGeminiSummary] = useState("");
+  const [cmsBundle, setCmsBundle] = useState({ settings: {}, legal: {} });
+  const [adminToken, setAdminTokenState] = useState(getStoredAdminToken());
+  const [adminRefreshToken, setAdminRefreshTokenState] = useState(getStoredRefreshToken());
+  const [adminUser, setAdminUser] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    apiFetch("/api/v1/cms/public")
+      .then((data) => {
+        if (!active) return;
+        setCmsBundle(data);
+        const colors = data?.settings?.["theme.colors"] || {};
+        Object.entries(colors).forEach(([key, value]) => {
+          document.documentElement.style.setProperty(`--${key.replace(/_/g, "-")}`, value);
+        });
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const setAdminToken = (token) => {
+    setStoredAdminToken(token);
+    setAdminTokenState(token);
+  };
+
+  const setAdminRefreshToken = (token) => {
+    setStoredRefreshToken(token);
+    setAdminRefreshTokenState(token);
+  };
+
+  const logoutAdmin = async () => {
+    try {
+      if (adminRefreshToken) {
+        await apiFetch("/api/v1/auth/logout", {
+          method: "POST",
+          headers: authHeaders(adminToken),
+          body: JSON.stringify({ refresh_token: adminRefreshToken }),
+        });
+      }
+    } catch {
+      // Best effort logout.
+    }
+    setAdminToken("");
+    setAdminRefreshToken("");
+    setAdminUser(null);
+  };
+
+  const refreshAdminSession = async () => {
+    if (!adminRefreshToken) return null;
+    const data = await apiFetch("/api/v1/auth/refresh", {
+      method: "POST",
+      body: JSON.stringify({ refresh_token: adminRefreshToken }),
+    });
+    setAdminToken(data.access_token || "");
+    if (data.refresh_token) setAdminRefreshToken(data.refresh_token);
+    if (data.user) setAdminUser(data.user);
+    return data;
+  };
+
+  const adminRequest = async (path, options = {}) => {
+    const request = async (token) => apiFetch(path, { ...options, headers: { ...(options.headers || {}), ...authHeaders(token || adminToken) } });
+    try {
+      return await request(adminToken);
+    } catch (error) {
+      if (!adminRefreshToken) throw error;
+      try {
+        const refreshed = await refreshAdminSession();
+        return await request(refreshed?.access_token || getStoredAdminToken());
+      } catch {
+        await logoutAdmin();
+        throw error;
+      }
+    }
+  };
 
   const toggleInterest = (val) => {
     setInterests((prev) =>
@@ -37,6 +125,7 @@ export function AppProvider({ children }) {
     setStrand(null); setBacStatus(null); setStrongSubjects([]); // ← added
     setGrades({}); setInterests([]);
     setLocation(""); setBudget(null); setResults([]); setStep(1);
+    setStudentId(null); setSessionId(null); setGeminiSummary("");
   };
 
   return (
@@ -45,7 +134,12 @@ export function AppProvider({ children }) {
       strand, setStrand, bacStatus, setBacStatus,
       strongSubjects, toggleStrongSubject, // ← toggleStrongSubject not setStrongSubjects
       grades, setGrade, interests, toggleInterest,
-      location, setLocation, budget, setBudget, results, setResults, restart,
+      location, setLocation, budget, setBudget, results, setResults,
+      studentId, setStudentId, sessionId, setSessionId, geminiSummary, setGeminiSummary,
+      cmsBundle, setCmsBundle,
+      adminToken, setAdminToken, adminRefreshToken, setAdminRefreshToken,
+      adminUser, setAdminUser, adminRequest, refreshAdminSession, logoutAdmin,
+      restart,
     }}>
       {children}
     </AppContext.Provider>

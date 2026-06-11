@@ -1,8 +1,9 @@
 import { useApp } from "../context/AppContext";
 import { T } from "../data/translations";
+import { cmsText } from "../cms";
 
 export default function StepStrand() {
-  const { lang, strand, setStrand, setStep } = useApp();
+  const { lang, strand, setStrand, setStep, cmsBundle } = useApp();
   const t = T[lang];
 
   const strands = [
@@ -13,8 +14,8 @@ export default function StepStrand() {
   return (
     <div className="step-panel active">
       <div className="step-heading">
-        <h2>{t.s1Title}</h2>
-        <p className="sub">{t.s1Sub}</p>
+        <h2>{cmsText(cmsBundle, "content.home", "strand_title_en", "strand_title_km", lang, t.s1Title)}</h2>
+        <p className="sub">{cmsText(cmsBundle, "content.home", "strand_sub_en", "strand_sub_km", lang, t.s1Sub)}</p>
       </div>
 
       <div className="strand-grid">

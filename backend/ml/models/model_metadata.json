@@ -1,0 +1,12 @@
+{
+  "model_type": "random_forest",
+  "data_source": "seed",
+  "accuracy": 0.5666666666666667,
+  "training_samples": 300,
+  "training_date": "2026-06-08T13:02:40.621029+00:00",
+  "triggered_by": "validation",
+  "old_accuracy": null,
+  "precision": 0.5264219576719577,
+  "recall": 0.5666666666666667,
+  "f1": 0.49592185592185595
+}

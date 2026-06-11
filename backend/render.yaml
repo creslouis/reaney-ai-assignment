@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: career-finder-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt && python ml/training/seed_data.py
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: ADMIN_API_KEY
+        sync: false
+      - key: SURVEY_WEBHOOK_TOKEN
+        sync: false
+      - key: FRONTEND_URL
+        sync: false

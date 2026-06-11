@@ -1,0 +1,103 @@
+UNIVERSITIES = {
+    "Computer Science & IT": [
+        {
+            "name": "Institute of Technology of Cambodia (ITC)",
+            "location": "Phnom Penh",
+            "tuition_usd_year": 500,
+            "type": "public",
+            "website": "itc.edu.kh",
+            "scholarship_available": True,
+        },
+        {
+            "name": "RUPP - Faculty of Science",
+            "location": "Phnom Penh",
+            "tuition_usd_year": 300,
+            "type": "public",
+            "website": "rupp.edu.kh",
+            "scholarship_available": True,
+        },
+    ],
+    "Business Administration": [
+        {
+            "name": "National University of Management (NUM)",
+            "location": "Phnom Penh",
+            "tuition_usd_year": 400,
+            "type": "public",
+            "website": "num.edu.kh",
+            "scholarship_available": True,
+        },
+        {
+            "name": "Pannasastra University of Cambodia (PUC)",
+            "location": "Phnom Penh",
+            "tuition_usd_year": 1500,
+            "type": "private",
+            "website": "puc.edu.kh",
+            "scholarship_available": False,
+        },
+    ],
+    "Accounting & Finance": [
+        {
+            "name": "Royal University of Law and Economics (RULE)",
+            "location": "Phnom Penh",
+            "tuition_usd_year": 450,
+            "type": "public",
+            "website": "rule.edu.kh",
+            "scholarship_available": True,
+        }
+    ],
+    "Civil Engineering": [{"name": "ITC", "location": "Phnom Penh", "tuition_usd_year": 500, "type": "public", "website": "itc.edu.kh", "scholarship_available": True}],
+    "Electrical Engineering": [{"name": "ITC", "location": "Phnom Penh", "tuition_usd_year": 500, "type": "public", "website": "itc.edu.kh", "scholarship_available": True}],
+    "Medicine & Health Sciences": [{"name": "University of Health Sciences (UHS)", "location": "Phnom Penh", "tuition_usd_year": 600, "type": "public", "website": "uhs.edu.kh", "scholarship_available": True}],
+    "Nursing": [{"name": "University of Puthisastra", "location": "Phnom Penh", "tuition_usd_year": 1200, "type": "private", "website": "puthisastra.edu.kh", "scholarship_available": True}],
+    "Education & Teaching": [{"name": "National Institute of Education", "location": "Phnom Penh", "tuition_usd_year": 200, "type": "public", "website": "nie.edu.kh", "scholarship_available": True}],
+    "Law": [{"name": "RULE", "location": "Phnom Penh", "tuition_usd_year": 450, "type": "public", "website": "rule.edu.kh", "scholarship_available": True}],
+    "Tourism & Hospitality": [{"name": "National University of Management (NUM)", "location": "Phnom Penh", "tuition_usd_year": 400, "type": "public", "website": "num.edu.kh", "scholarship_available": True}],
+    "Agriculture": [{"name": "Royal University of Agriculture", "location": "Phnom Penh", "tuition_usd_year": 350, "type": "public", "website": "rua.edu.kh", "scholarship_available": True}],
+    "Architecture": [{"name": "Royal University of Fine Arts", "location": "Phnom Penh", "tuition_usd_year": 300, "type": "public", "website": "rufa.edu.kh", "scholarship_available": True}],
+    "Environmental Science": [{"name": "RUPP", "location": "Phnom Penh", "tuition_usd_year": 300, "type": "public", "website": "rupp.edu.kh", "scholarship_available": True}],
+    "Media & Communication": [{"name": "University of Cambodia", "location": "Phnom Penh", "tuition_usd_year": 900, "type": "private", "website": "uc.edu.kh", "scholarship_available": False}],
+    "International Relations": [{"name": "University of Cambodia", "location": "Phnom Penh", "tuition_usd_year": 900, "type": "private", "website": "uc.edu.kh", "scholarship_available": False}],
+}
+
+CAREER_PATHS = {
+    "Computer Science & IT": [
+        {"career": "Software Developer", "avg_salary_usd_month": 800, "demand": "high"},
+        {"career": "Web Developer", "avg_salary_usd_month": 600, "demand": "high"},
+        {"career": "Data Analyst", "avg_salary_usd_month": 700, "demand": "high"},
+    ],
+    "Business Administration": [
+        {"career": "Business Analyst", "avg_salary_usd_month": 650, "demand": "high"},
+        {"career": "Sales Executive", "avg_salary_usd_month": 450, "demand": "high"},
+    ],
+    "Accounting & Finance": [{"career": "Accountant", "avg_salary_usd_month": 500, "demand": "high"}],
+    "Civil Engineering": [{"career": "Civil Engineer", "avg_salary_usd_month": 700, "demand": "high"}],
+    "Electrical Engineering": [{"career": "Electrical Engineer", "avg_salary_usd_month": 750, "demand": "high"}],
+    "Medicine & Health Sciences": [{"career": "General Practitioner", "avg_salary_usd_month": 1000, "demand": "high"}],
+    "Nursing": [{"career": "Registered Nurse", "avg_salary_usd_month": 500, "demand": "high"}],
+    "Education & Teaching": [{"career": "Teacher", "avg_salary_usd_month": 350, "demand": "high"}],
+    "Law": [{"career": "Legal Officer", "avg_salary_usd_month": 700, "demand": "medium"}],
+    "Tourism & Hospitality": [{"career": "Hotel Manager", "avg_salary_usd_month": 550, "demand": "medium"}],
+    "Agriculture": [{"career": "Agronomist", "avg_salary_usd_month": 450, "demand": "medium"}],
+    "Architecture": [{"career": "Architect", "avg_salary_usd_month": 700, "demand": "medium"}],
+    "Environmental Science": [{"career": "Environmental Officer", "avg_salary_usd_month": 500, "demand": "medium"}],
+    "Media & Communication": [{"career": "Content Strategist", "avg_salary_usd_month": 550, "demand": "high"}],
+    "International Relations": [{"career": "Program Officer", "avg_salary_usd_month": 700, "demand": "medium"}],
+}
+
+MAJOR_KHMER = {
+    "Computer Science & IT": "វិទ្យាសាស្ត្រកុំព្យូទ័រ និងព័ត៌មានវិទ្យា",
+    "Business Administration": "គ្រប់គ្រងអាជីវកម្ម",
+    "Accounting & Finance": "គណនេយ្យ និងហិរញ្ញវត្ថុ",
+    "Civil Engineering": "វិស្វកម្មស៊ីវិល",
+    "Electrical Engineering": "វិស្វកម្មអគ្គិសនី",
+    "Medicine & Health Sciences": "វេជ្ជសាស្ត្រ និងវិទ្យាសាស្ត្រសុខភាព",
+    "Nursing": "គិលានុបដ្ឋាក",
+    "Education & Teaching": "អប់រំ និងបង្រៀន",
+    "Law": "ច្បាប់",
+    "Tourism & Hospitality": "ទេសចរណ៍ និងបដិសណ្ឋារកិច្ច",
+    "Agriculture": "កសិកម្ម",
+    "Architecture": "ស្ថាបត្យកម្ម",
+    "Environmental Science": "វិទ្យាសាស្ត្របរិស្ថាន",
+    "Media & Communication": "ប្រព័ន្ធផ្សព្វផ្សាយ និងទំនាក់ទំនង",
+    "International Relations": "ទំនាក់ទំនងអន្តរជាតិ",
+}

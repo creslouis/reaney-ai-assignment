@@ -4,7 +4,7 @@ import ResultCard from "../components/ResultCard";
 import Chat from "../components/Chat";
 
 export default function StepResults() {
-  const { lang, strand, interests, location, results, restart, setShowModal } = useApp();
+  const { lang, strand, interests, location, results, restart, setShowModal, geminiSummary } = useApp();
   const t = T[lang];
 
   const strandLabel = lang === "km"
@@ -35,6 +35,13 @@ export default function StepResults() {
           )}
         </div>
       </div>
+
+      {geminiSummary && (
+        <div className="summary-card">
+          <div className="section-title">{t.summaryTitle}</div>
+          <div className="why-text">{geminiSummary}</div>
+        </div>
+      )}
 
       {/* Result cards */}
       {results.map((r, i) => (
