@@ -1,6 +1,26 @@
+# Python
 .venv/
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Env files (NEVER commit these)
 .env
+.env.local
+.env.*.local
+
+# Node / Frontend
 node_modules/
 dist/
+dist-ssr/
+*.local
+
+# ML artifacts
+backend/ml/data/*.csv
+backend/ml/models/*.pkl
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,6 +1,7 @@
 import { AppProvider, useApp } from "./context/AppContext";
 import { Topbar, ProgressBar } from "./components/Nav";
 import Modal from "./components/Modal";
+import ProtectedRoute from "./components/ProtectedRoute";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import StepStrand from "./pages/StepStrand";
 import StepBacStatus from "./pages/StepBacStatus";
@@ -15,6 +16,7 @@ import MlAdminPage from "./pages/MlAdminPage";
 import UniversityAdminPage from "./pages/UniversityAdminPage";
 import CmsAdminPage from "./pages/CmsAdminPage";
 import LegalPage from "./pages/LegalPage";
+import LoginPage from "./pages/LoginPage";
 import Footer from "./components/Footer";
 
 function WizardRouter() {
@@ -42,13 +44,46 @@ function AppRoutes() {
       <Topbar />
       {isWizard && <ProgressBar />}
       <Routes>
+        {/* Public routes */}
         <Route path="/" element={<WizardRouter />} />
         <Route path="/experience" element={<ExperiencePage />} />
-        <Route path="/admin/experience" element={<ExperienceAdminPage />} />
-        <Route path="/admin/ml" element={<MlAdminPage />} />
-        <Route path="/admin/universities" element={<UniversityAdminPage />} />
-        <Route path="/admin/cms" element={<CmsAdminPage />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/legal/:slug" element={<LegalPage />} />
+
+        {/* Admin-only routes – protected */}
+        <Route
+          path="/admin/experience"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <ExperienceAdminPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/ml"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <MlAdminPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/universities"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <UniversityAdminPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/cms"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <CmsAdminPage />
+            </ProtectedRoute>
+          }
+        />
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />

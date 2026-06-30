@@ -2,16 +2,44 @@ services:
   - type: web
     name: career-finder-api
     runtime: python
-    buildCommand: pip install --upgrade pip setuptools wheel && pip install -r requirements.txt && python ml/training/seed_data.py
+    rootDir: backend
+    buildCommand: pip install --upgrade pip setuptools wheel && pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
+      # Database (Supabase)
       - key: DATABASE_URL
-        sync: false
+        sync: false          # Set in Render dashboard: postgresql+asyncpg://...
+
+      # AI
       - key: GEMINI_API_KEY
         sync: false
+
+      # Security
       - key: ADMIN_API_KEY
         sync: false
       - key: SURVEY_WEBHOOK_TOKEN
         sync: false
+
+      # App
       - key: FRONTEND_URL
+        sync: false          # e.g. https://reaney.vercel.app
+      - key: ENVIRONMENT
+        value: production
+
+      # Auth / JWT
+      - key: JWT_SECRET_KEY
+        sync: false          # generate: openssl rand -hex 32
+      - key: JWT_REFRESH_SECRET_KEY
+        sync: false          # generate: openssl rand -hex 32
+
+      # Google OAuth
+      - key: GOOGLE_CLIENT_ID
         sync: false
+      - key: GOOGLE_ALLOWED_ADMIN_EMAILS
+        sync: false          # comma-separated admin emails
+
+      # ML (optional)
+      - key: ML_RETRAIN_THRESHOLD
+        value: "50"
+      - key: ML_RETRAIN_INTERVAL_DAYS
+        value: "7"

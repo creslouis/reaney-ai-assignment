@@ -12,7 +12,14 @@ from app.database import get_db
 from app.models.admin_session import AdminSession
 from app.models.admin_user import AdminUser
 from app.models.legal_document import LegalDocument
-from app.schemas.auth import GoogleLoginRequest, RefreshTokenRequest, TermsAcceptRequest, TwoFactorVerifyRequest
+from app.schemas.auth import (
+    EmailPasswordLoginRequest,
+    GoogleLoginRequest,
+    RefreshTokenRequest,
+    RegisterRequest,
+    TermsAcceptRequest,
+    TwoFactorVerifyRequest,
+)
 from app.services.audit_service import log_audit_event
 from app.services.auth_service import (
     build_totp_uri,
@@ -21,8 +28,10 @@ from app.services.auth_service import (
     decode_access_token,
     decode_refresh_token,
     generate_totp_secret,
+    hash_password,
     hash_token,
     verify_google_id_token,
+    verify_password,
     verify_totp,
 )
 
@@ -48,7 +57,14 @@ async def _get_current_admin_user(db: AsyncSession, authorization: str) -> Admin
         payload = decode_access_token(token)
     except Exception as exc:
         raise HTTPException(status_code=401, detail=str(exc)) from exc
-    user = await db.scalar(select(AdminUser).where(AdminUser.google_sub == payload.get("sub")))
+    # Support both google_sub-based and email-based JWT sub fields
+    sub = payload.get("sub")
+    email = payload.get("email", "")
+    user = await db.scalar(
+        select(AdminUser).where(
+            (AdminUser.google_sub == sub) | (AdminUser.email == email.lower())
+        )
+    )
     if not user:
         raise HTTPException(status_code=401, detail="Admin user not found")
     return user
@@ -107,6 +123,57 @@ async def google_login(payload: GoogleLoginRequest, db: AsyncSession = Depends(g
     }
 
 
+@router.post("/login")
+async def email_password_login(payload: EmailPasswordLoginRequest, db: AsyncSession = Depends(get_db)):
+    email = payload.email.lower()
+    user = await db.scalar(select(AdminUser).where(AdminUser.email == email))
+    if not user or not user.password_hash or not verify_password(payload.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="Account is disabled")
+    user.last_login_at = datetime.now(timezone.utc)
+    access_token = create_access_token(str(user.id), email, role=user.role)
+    refresh_token, refresh_hash, refresh_expires_at = create_refresh_token(str(user.id), email)
+    db.add(AdminSession(admin_user_id=user.id, refresh_token_hash=refresh_hash, expires_at=refresh_expires_at, is_revoked=False))
+    await log_audit_event(db, admin_user_id=str(user.id), action="auth.email_login", target_type="admin_user", target_id=str(user.id), details={"email": email})
+    await db.commit()
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+        "requires_terms_acceptance": not user.terms_accepted,
+        "user": _user_payload(user),
+    }
+
+
+@router.post("/register")
+async def register(payload: RegisterRequest, db: AsyncSession = Depends(get_db)):
+    email = payload.email.lower()
+    existing = await db.scalar(select(AdminUser).where(AdminUser.email == email))
+    if existing:
+        raise HTTPException(status_code=409, detail="Email already registered")
+    user = AdminUser(
+        email=email,
+        full_name=payload.full_name,
+        password_hash=hash_password(payload.password),
+        role="user",
+        is_active=True,
+    )
+    db.add(user)
+    await db.flush()
+    access_token = create_access_token(str(user.id), email, role=user.role)
+    refresh_token, refresh_hash, refresh_expires_at = create_refresh_token(str(user.id), email)
+    db.add(AdminSession(admin_user_id=user.id, refresh_token_hash=refresh_hash, expires_at=refresh_expires_at, is_revoked=False))
+    await log_audit_event(db, admin_user_id=str(user.id), action="auth.register", target_type="admin_user", target_id=str(user.id), details={"email": email})
+    await db.commit()
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+        "user": _user_payload(user),
+    }
+
+
 @router.post("/refresh")
 async def refresh_session(payload: RefreshTokenRequest, db: AsyncSession = Depends(get_db)):
     try:
@@ -119,12 +186,19 @@ async def refresh_session(payload: RefreshTokenRequest, db: AsyncSession = Depen
     if not session or session.expires_at < datetime.now(timezone.utc):
         raise HTTPException(status_code=401, detail="Refresh session expired")
 
-    user = await db.scalar(select(AdminUser).where(AdminUser.google_sub == token_payload.get("sub")))
+    sub = token_payload.get("sub")
+    email_from_token = token_payload.get("email", "")
+    user = await db.scalar(
+        select(AdminUser).where(
+            (AdminUser.google_sub == sub) | (AdminUser.email == email_from_token.lower())
+        )
+    )
     if not user or not user.is_active:
         raise HTTPException(status_code=401, detail="Admin user not found")
 
-    access_token = create_access_token(user.google_sub, user.email, role=user.role)
-    new_refresh_token, new_refresh_hash, new_expires = create_refresh_token(user.google_sub, user.email)
+    user_sub = user.google_sub or str(user.id)
+    access_token = create_access_token(user_sub, user.email, role=user.role)
+    new_refresh_token, new_refresh_hash, new_expires = create_refresh_token(user_sub, user.email)
     session.refresh_token_hash = new_refresh_hash
     session.expires_at = new_expires
     await log_audit_event(db, admin_user_id=str(user.id), action="auth.refresh", target_type="admin_session", target_id=str(session.id))

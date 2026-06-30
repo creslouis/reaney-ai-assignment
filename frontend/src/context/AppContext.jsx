@@ -49,6 +49,26 @@ export function AppProvider({ children }) {
     };
   }, []);
 
+  // Restore admin user info on page refresh if a token is stored
+  useEffect(() => {
+    if (!adminToken || adminUser) return;
+    let active = true;
+    apiFetch("/api/v1/auth/me", { headers: authHeaders(adminToken) })
+      .then((data) => { if (active) setAdminUser(data); })
+      .catch(() => {
+        // Token is invalid – clear it
+        if (active) {
+          setStoredAdminToken("");
+          setStoredRefreshToken("");
+          setAdminTokenState("");
+          setAdminRefreshTokenState("");
+        }
+      });
+    return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+
   const setAdminToken = (token) => {
     setStoredAdminToken(token);
     setAdminTokenState(token);

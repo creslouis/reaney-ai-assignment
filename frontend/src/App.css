@@ -815,3 +815,106 @@ body {
 }
 .chat-send-btn:hover { background: var(--primary-dark); transform: scale(1.05); }
 .chat-send-btn:disabled { background: var(--muted); cursor: not-allowed; transform: none; }
+
+/* ── LOGIN PAGE ── */
+.login-page-container {
+  min-height: calc(100vh - 120px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+.login-card {
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.login-card-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+.login-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 0.3rem;
+}
+.login-subtitle {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0;
+}
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.login-form .form-input { margin-bottom: 0 !important; }
+.login-submit-btn {
+  margin-top: 0.25rem;
+}
+.login-switch {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin: 0.75rem 0 0;
+}
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  padding: 0;
+  text-decoration: underline;
+}
+.link-btn:hover { opacity: 0.75; }
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.25rem 0 1rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.login-divider::before, .login-divider::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid var(--border);
+}
+.google-btn-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+/* ── USER CHIP IN NAVBAR ── */
+.user-chip-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--primary);
+}
+.user-email-chip {
+  font-size: 0.78rem;
+  color: var(--ink2);
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 600px) {
+  .user-email-chip { display: none; }
+}
