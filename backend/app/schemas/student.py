@@ -18,6 +18,7 @@ class StudentSubmitRequest(BaseModel):
     grade_level: str = "Grade12"
     province: str | None = None
     budget_range: str | None = None
+    track: str | None = "Science Track"
     grades: dict[str, float | str] = Field(default_factory=dict)
     interests: list[str] = Field(default_factory=list)
     personality: PersonalityInput = Field(default_factory=PersonalityInput)

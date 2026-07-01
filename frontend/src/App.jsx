@@ -17,6 +17,7 @@ import UniversityAdminPage from "./pages/UniversityAdminPage";
 import CmsAdminPage from "./pages/CmsAdminPage";
 import LegalPage from "./pages/LegalPage";
 import LoginPage from "./pages/LoginPage";
+import StudentSurveyPage from "./pages/StudentSurveyPage";
 import Footer from "./components/Footer";
 
 function WizardRouter() {
@@ -47,6 +48,7 @@ function AppRoutes() {
         {/* Public routes */}
         <Route path="/" element={<WizardRouter />} />
         <Route path="/experience" element={<ExperiencePage />} />
+        <Route path="/survey" element={<StudentSurveyPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/legal/:slug" element={<LegalPage />} />
 

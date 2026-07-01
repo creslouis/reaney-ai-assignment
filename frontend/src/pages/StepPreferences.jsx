@@ -41,13 +41,14 @@ export default function StepPreferences() {
         ? grades
         : strongSubjects.reduce((acc, subject) => ({ ...acc, [subject]: "A" }), {});
 
-      const payload = {
+        const payload = {
         name: "Guest Student",
         email: `guest-${now}@example.com`,
         phone: null,
         grade_level: bacStatus === "done" ? "BacII" : "Grade12",
         province: location || null,
         budget_range: budget || "any",
+        track: strand === "social" ? "Social Science Track" : "Science Track",
         grades: submitGrades,
         interests,
         personality: {

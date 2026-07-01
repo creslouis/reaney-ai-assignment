@@ -12,7 +12,7 @@ from app.config import get_settings
 from app.database import AsyncSessionLocal, create_tables
 from app.models.cms_setting import CMSSetting
 from app.models.university import University
-from app.routers import auth, chat, cms, contact, experience, ml, recommendations, students, survey, universities
+from app.routers import auth, chat, cms, contact, experience, ml, recommendations, students, survey, universities, highschool_survey
 from app.services.cms_service import seed_cms_defaults
 from app.services.predictor_singleton import predictor
 from app.services.university_service import seed_university_data
@@ -39,8 +39,10 @@ app.include_router(recommendations.router, prefix="/api/v1")
 app.include_router(chat.router, prefix="/api/v1")
 app.include_router(contact.router, prefix="/api/v1")
 app.include_router(survey.router, prefix="/api/v1")
+app.include_router(highschool_survey.router, prefix="/api/v1")
 app.include_router(universities.router, prefix="/api/v1")
 app.include_router(experience.router, prefix="/api/v1")
+
 
 
 @app.get("/")

@@ -98,8 +98,8 @@ def _build_frontend_results(prediction_result: dict, university_map: dict[str, l
                 "major": major,
                 "major_kh": MAJOR_KHMER.get(major, major),
                 "match": round(item["confidence"] * 100, 2),
-                "why_en": f"{major} matches your academic profile, interests, and current preference pattern.",
-                "why_kh": f"ជំនាញ {MAJOR_KHMER.get(major, major)} សមស្របជាមួយលទ្ធផលសិក្សា ចំណាប់អារម្មណ៍ និងចំណូលចិត្តរបស់អ្នក។",
+                "why_en": item.get("explanation_en", f"{major} matches your academic profile, interests, and current preference pattern."),
+                "why_kh": item.get("explanation_kh", f"ជំនាញ {MAJOR_KHMER.get(major, major)} សមស្របជាមួយលទ្ធផលសិក្សា ចំណាប់អារម្មណ៍ និងចំណូលចិត្តរបស់អ្នក។"),
                 "universities": _format_universities(university_map.get(major, UNIVERSITIES.get(major, []))),
             }
         )
@@ -143,6 +143,7 @@ async def submit_student(payload: StudentSubmitRequest, db: AsyncSession = Depen
             "interests": payload.interests,
             "budget_range": payload.budget_range,
             "province": payload.province,
+            "track": payload.track,
             "personality": payload.personality.model_dump(),
         }
         prediction_result = predictor.predict(student_features)
@@ -182,8 +183,8 @@ async def submit_student(payload: StudentSubmitRequest, db: AsyncSession = Depen
                     "reason": f"Strong match with your profile and selected interests.",
                     "match_score": round(prediction_result["all_predictions"][idx]["confidence"] * 100, 2),
                     "universities": _format_universities(universities),
-                    "why_en": f"{major} matches your academic profile, interests, and current preference pattern.",
-                    "why_kh": f"ជំនាញ {MAJOR_KHMER.get(major, major)} សមស្របជាមួយលទ្ធផលសិក្សា ចំណាប់អារម្មណ៍ និងចំណូលចិត្តរបស់អ្នក។",
+                    "why_en": prediction_result["all_predictions"][idx].get("explanation_en", f"{major} matches your academic profile, interests, and current preference pattern."),
+                    "why_kh": prediction_result["all_predictions"][idx].get("explanation_kh", f"ជំនាញ {MAJOR_KHMER.get(major, major)} សមស្របជាមួយលទ្ធផលសិក្សា ចំណាប់អារម្មណ៍ និងចំណូលចិត្តរបស់អ្នក។"),
                     "experience_insights": experience_insights.get(major, []),
                 }
             )

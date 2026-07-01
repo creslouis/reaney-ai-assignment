@@ -11,6 +11,7 @@ export default function MlAdminPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [actionMessage, setActionMessage] = useState("");
+  const [surveyStats, setSurveyStats] = useState(null);
 
   // Upload state
   const [uploadFile, setUploadFile] = useState(null);
@@ -29,16 +30,39 @@ export default function MlAdminPage() {
     setActionMessage("");
     try {
       const headers = authHeaders(token);
-      const [statusData, evaluationData] = await Promise.all([
+      const [statusData, evaluationData, surveyData] = await Promise.all([
         apiFetch("/api/v1/ml/status", { headers }),
         apiFetch("/api/v1/ml/evaluation", { headers }),
+        apiFetch("/api/v1/hs-survey/stats", { headers }).catch(() => null),
       ]);
       setStatus(statusData);
       setEvaluation(evaluationData);
+      setSurveyStats(surveyData);
     } catch (e) {
       setError(e.message || t.adminLoadError);
     }
     setLoading(false);
+  };
+
+  const exportSurveys = async () => {
+    try {
+      const response = await fetch("/api/v1/hs-survey/export", {
+        headers: authHeaders(token)
+      });
+      if (!response.ok) {
+        throw new Error("Failed to export surveys");
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "hs_survey_export.jsonl";
+      a.click();
+      window.URL.revokeObjectURL(url);
+      await loadData();
+    } catch (e) {
+      setError(e.message || "Failed to export surveys");
+    }
   };
 
   const retrain = async () => {
@@ -172,6 +196,51 @@ export default function MlAdminPage() {
             </div>
           )}
         </div>
+
+        {/* High School Survey Stats Card */}
+        {surveyStats && (
+          <div className="experience-card" style={{ marginBottom: "2rem" }}>
+            <div className="step-heading" style={{ marginBottom: "1rem" }}>
+              <h3 style={{ fontSize: "1.1rem", fontWeight: 600 }}>High School Survey Data</h3>
+              <p className="sub">Monitor incoming survey responses from high school students.</p>
+            </div>
+            
+            <div style={{ padding: "1.5rem", background: "var(--background-secondary)", borderRadius: "8px", marginBottom: "1rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <div style={{ fontSize: "2rem", fontWeight: "bold", color: "var(--primary)" }}>
+                    {surveyStats.total_surveys} <span style={{ fontSize: "1rem", color: "var(--text-secondary)", fontWeight: "normal" }}>/ {surveyStats.threshold}</span>
+                  </div>
+                  <div style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}>Surveys Collected</div>
+                </div>
+                
+                {surveyStats.ready_for_export && (
+                  <div style={{ background: "#e8f5e9", color: "#2e7d32", padding: "0.5rem 1rem", borderRadius: "20px", fontWeight: "bold", fontSize: "0.85rem" }}>
+                    ✓ Ready for Export
+                  </div>
+                )}
+              </div>
+              
+              <div style={{ width: "100%", height: "8px", background: "#ddd", borderRadius: "4px", marginTop: "1rem", overflow: "hidden" }}>
+                <div style={{ 
+                  width: `${Math.min(100, (surveyStats.total_surveys / surveyStats.threshold) * 100)}%`, 
+                  height: "100%", 
+                  background: surveyStats.ready_for_export ? "#4caf50" : "var(--primary)",
+                  transition: "width 0.3s ease"
+                }}></div>
+              </div>
+            </div>
+
+            <button
+              className="btn-submit"
+              onClick={exportSurveys}
+              disabled={!surveyStats.total_surveys}
+              style={{ width: "100%", background: "var(--primary-dark)" }}
+            >
+              Export New Surveys to JSONL
+            </button>
+          </div>
+        )}
 
         {/* Upload Dataset card */}
         <div className="experience-card">

@@ -38,6 +38,9 @@ export function Topbar() {
           <NavLink to="/experience" className={({ isActive }) => `top-link${isActive ? " active" : ""}`}>
             {lang === "km" ? (navCms.experience_km || t.navExperience) : (navCms.experience_en || t.navExperience)}
           </NavLink>
+          <NavLink to="/survey" className={({ isActive }) => `top-link${isActive ? " active" : ""}`}>
+            {lang === "km" ? "ស្ទង់មតិ" : "Survey"}
+          </NavLink>
           {/* Admin links – only visible when logged in as admin */}
           {isAdmin && (
             <>
