@@ -64,7 +64,7 @@ class GeminiService:
     def __init__(self) -> None:
         settings = get_settings()
         self.available = bool(settings.gemini_api_key)
-        self.model_name = "gemini-1.5-flash"
+        self.model_name = "gemini-2.5-flash"
         if self.available:
             genai.configure(api_key=settings.gemini_api_key)
             self.model = genai.GenerativeModel(self.model_name)
