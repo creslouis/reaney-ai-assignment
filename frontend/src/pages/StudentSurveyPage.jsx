@@ -25,12 +25,12 @@ const MAJORS = [
   "Economics"
 ];
 
-const StudentSurveyPage = () => {
+export default function StudentSurveyPage() {
   const { lang } = useApp();
   const t = T[lang];
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(1); // 1 = Form, 2 = Results
   const [formData, setFormData] = useState({
-    study_track: "",
+    study_track: "Science Track",
     intended_major: "",
     province: "",
     budget_range: "",
@@ -60,10 +60,11 @@ const StudentSurveyPage = () => {
 
   const filteredMajors = MAJORS.filter(m => m.toLowerCase().includes(searchMajor.toLowerCase()));
 
-  const handleNext = () => setStep(s => s + 1);
-  const handlePrev = () => setStep(s => s - 1);
-
   const handleSubmit = async () => {
+    if (!formData.intended_major) {
+      setError(lang === "en" ? "Please select your intended major." : "សូមជ្រើសរើសជំនាញដែលចង់រៀន។");
+      return;
+    }
     setIsSubmitting(true);
     setError(null);
     try {
@@ -73,13 +74,25 @@ const StudentSurveyPage = () => {
       });
       if (res.success) {
         setPrediction(res.prediction);
-        setStep(5);
+        setStep(2); // Show results
       }
     } catch (err) {
       setError(err.message || "Failed to submit survey");
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const toggleInterest = (val) => {
+    setFormData(prev => {
+      const isSelected = prev.interests.includes(val);
+      if (isSelected) {
+        return { ...prev, interests: prev.interests.filter(x => x !== val) };
+      } else if (prev.interests.length < 5) {
+        return { ...prev, interests: [...prev.interests, val] };
+      }
+      return prev;
+    });
   };
 
   const handleDownloadResponse = () => {
@@ -91,97 +104,82 @@ const StudentSurveyPage = () => {
   };
 
   return (
-    <div className="step-panel active">
-      
-      {step === 1 && (
-        <>
-          <div className="step-heading">
-            <h2>{lang === "en" ? "Basic Information" : "ព័ត៌មានមូលដ្ឋាន"}</h2>
-            <p className="sub">{lang === "en" ? "Tell us about your high school study track and intended major." : "ប្រាប់យើងអំពីផ្នែកសិក្សារបស់អ្នកនិងជំនាញដែលចង់រៀន។"}</p>
-          </div>
-          
-          <div className="form-group">
-            <label className="form-label">{lang === "en" ? "Study Track" : "ផ្នែកសិក្សា"}</label>
-            <div className="budget-grid">
+    <main className="main">
+      <div className="step-panel active">
+        <div className="step-heading">
+          <h2>{lang === "en" ? "High School Student Survey" : "ការស្ទង់មតិសិស្សវិទ្យាល័យ"}</h2>
+          <p className="sub">{lang === "en" ? "Help us tailor recommendations to your situation." : "ជួយយើងក្នុងការណែនាំតាមស្ថានភាពរបស់អ្នក។"}</p>
+        </div>
+
+        {step === 1 && (
+          <div className="experience-card">
+            
+            <div className="section-title">{lang === "en" ? "Study Track" : "ផ្នែកសិក្សា"}</div>
+            <div className="strand-grid exp-grid-3">
               <div 
-                className={`budget-option ${formData.study_track === "Science Track" ? "selected" : ""}`}
+                className={`strand-card ${formData.study_track === "Science Track" ? "selected" : ""}`}
                 onClick={() => setFormData({...formData, study_track: "Science Track"})}
               >
-                <div className="amount">{lang === "en" ? "Science Track" : "ថ្នាក់វិទ្យាសាស្ត្រ"}</div>
+                <div className="strand-emoji">🔬</div>
+                <div className="strand-name">{lang === "en" ? "Science Track" : "ថ្នាក់វិទ្យាសាស្ត្រ"}</div>
               </div>
               <div 
-                className={`budget-option ${formData.study_track === "Social Science Track" ? "selected" : ""}`}
+                className={`strand-card ${formData.study_track === "Social Science Track" ? "selected" : ""}`}
                 onClick={() => setFormData({...formData, study_track: "Social Science Track"})}
               >
-                <div className="amount">{lang === "en" ? "Social Science" : "ថ្នាក់សង្គម"}</div>
+                <div className="strand-emoji">📖</div>
+                <div className="strand-name">{lang === "en" ? "Social Science" : "ថ្នាក់សង្គម"}</div>
               </div>
             </div>
-          </div>
 
-          <div className="form-group" style={{ position: "relative" }}>
-            <label className="form-label">{lang === "en" ? "What major do you want to study?" : "តើអ្នកចង់រៀនជំនាញអ្វី?"}</label>
-            <input 
-              type="text" 
-              className="form-select" 
-              style={{ background: "#fff" }}
-              placeholder={lang === "en" ? "Type to search majors..." : "វាយដើម្បីស្វែងរកជំនាញ..."}
-              value={searchMajor}
-              onChange={(e) => {
-                setSearchMajor(e.target.value);
-                setShowMajorSuggestions(true);
-              }}
-              onFocus={() => setShowMajorSuggestions(true)}
-            />
-            {showMajorSuggestions && searchMajor && (
-              <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 10, background: "#fff", border: "1px solid #ddd", borderRadius: "8px", marginTop: "4px", maxHeight: "200px", overflowY: "auto", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
-                {filteredMajors.map(m => (
-                  <div 
-                    key={m} 
-                    style={{ padding: "12px 16px", cursor: "pointer", borderBottom: "1px solid #eee" }}
-                    onClick={() => {
-                      setFormData({...formData, intended_major: m});
-                      setSearchMajor(m);
-                      setShowMajorSuggestions(false);
-                    }}
-                  >
-                    {m}
-                  </div>
-                ))}
-                {filteredMajors.length === 0 && (
-                  <div style={{ padding: "12px 16px" }}>
-                    <button className="btn-submit" style={{ padding: "8px", fontSize: "14px" }} onClick={() => {
-                      setFormData({...formData, intended_major: searchMajor});
-                      setShowMajorSuggestions(false);
-                    }}>
-                      Use "{searchMajor}"
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-            {formData.intended_major && <p style={{ fontSize: "14px", color: "var(--primary)", marginTop: "8px" }}>Selected: <strong>{formData.intended_major}</strong></p>}
-          </div>
+            <div className="section-title" style={{ marginTop: "2rem" }}>{lang === "en" ? "What major do you want to study?" : "តើអ្នកចង់រៀនជំនាញអ្វី?"}</div>
+            <div style={{ position: "relative" }}>
+              <input 
+                type="text" 
+                className="form-input" 
+                placeholder={lang === "en" ? "Type to search majors..." : "វាយដើម្បីស្វែងរកជំនាញ..."}
+                value={searchMajor}
+                onChange={(e) => {
+                  setSearchMajor(e.target.value);
+                  setShowMajorSuggestions(true);
+                }}
+                onFocus={() => setShowMajorSuggestions(true)}
+              />
+              {showMajorSuggestions && searchMajor && (
+                <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 10, background: "#fff", border: "1px solid #ddd", borderRadius: "8px", marginTop: "4px", maxHeight: "200px", overflowY: "auto", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+                  {filteredMajors.map(m => (
+                    <div 
+                      key={m} 
+                      style={{ padding: "12px 16px", cursor: "pointer", borderBottom: "1px solid #eee" }}
+                      onClick={() => {
+                        setFormData({...formData, intended_major: m});
+                        setSearchMajor(m);
+                        setShowMajorSuggestions(false);
+                      }}
+                    >
+                      {m}
+                    </div>
+                  ))}
+                  {filteredMajors.length === 0 && (
+                    <div style={{ padding: "12px 16px" }}>
+                      <button className="btn-submit" style={{ padding: "8px", fontSize: "14px" }} onClick={() => {
+                        setFormData({...formData, intended_major: searchMajor});
+                        setShowMajorSuggestions(false);
+                      }}>
+                        Use "{searchMajor}"
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+              {formData.intended_major && <p style={{ fontSize: "14px", color: "var(--primary)", marginTop: "8px", fontWeight: "500" }}>Selected: {formData.intended_major}</p>}
+            </div>
 
-          <div className="step-nav">
-            <button className="btn-submit" onClick={handleNext} disabled={!formData.study_track || !formData.intended_major} style={{ width: "100%" }}>
-              {t.next} →
-            </button>
-          </div>
-        </>
-      )}
-
-      {step === 2 && (
-        <>
-          <div className="step-heading">
-            <h2>{lang === "en" ? "Grades (BAC II)" : "និទ្ទេស (BAC II)"}</h2>
-            <p className="sub">{lang === "en" ? "Enter your actual or expected grades." : "បញ្ចូលនិទ្ទេសពិតប្រាកដ ឬរំពឹងទុករបស់អ្នក។"}</p>
-          </div>
-          
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
-            {['math', 'khmer', 'english', 'physics', 'chemistry', 'biology', 'history', 'geography'].map(subj => (
-              <div className="form-group" key={subj} style={{ marginBottom: "10px" }}>
-                <label className="form-label" style={{ textTransform: "capitalize" }}>{subj}</label>
-                <div className="select-wrap">
+            <div className="section-title" style={{ marginTop: "2rem" }}>{lang === "en" ? "Grades (BAC II)" : "និទ្ទេស (BAC II)"}</div>
+            <div className="exp-form-grid">
+              {['math', 'khmer', 'english', 'physics', 'chemistry', 'biology', 'history', 'geography'].map(subj => (
+                <div key={subj}>
+                  <label className="form-label" style={{ textTransform: "capitalize", fontSize: "13px", color: "var(--text-secondary)", marginBottom: "4px", display: "block" }}>{subj}</label>
                   <select 
                     className="form-select" 
                     value={formData[`${subj}_score`]} 
@@ -196,131 +194,86 @@ const StudentSurveyPage = () => {
                     <option value={0}>F</option>
                   </select>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="step-nav">
-            <button className="btn-back" onClick={handlePrev}>← {t.back}</button>
-            <button className="btn-submit" onClick={handleNext}>{t.next} →</button>
-          </div>
-        </>
-      )}
-
-      {step === 3 && (
-        <>
-          <div className="step-heading">
-            <h2>{t.s3Title}</h2>
-            <p className="sub">{t.s3Sub}</p>
-          </div>
-          
-          <div className="interests-grid">
-            {t.interests.map((i) => {
-              const isSelected = formData.interests.includes(i.val);
-              return (
-                <button
-                  key={i.val}
-                  className={`interest-btn ${isSelected ? "selected" : ""}`}
-                  onClick={() => {
-                    if (isSelected) {
-                      setFormData({...formData, interests: formData.interests.filter(x => x !== i.val)});
-                    } else if (formData.interests.length < 5) {
-                      setFormData({...formData, interests: [...formData.interests, i.val]});
-                    }
-                  }}
-                >
-                  <span className="icon">{i.icon}</span>
-                  {i.label}
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="step-nav">
-            <button className="btn-back" onClick={handlePrev}>← {t.back}</button>
-            <button className="btn-submit" onClick={handleNext}>{t.next} →</button>
-          </div>
-        </>
-      )}
-
-      {step === 4 && (
-        <>
-          <div className="step-heading">
-            <h2>{lang === "en" ? "Preferences" : "ចំណូលចិត្ត"}</h2>
-            <p className="sub">{lang === "en" ? "Help us tailor the recommendations to your situation." : "ជួយយើងក្នុងការណែនាំតាមស្ថានភាពរបស់អ្នក។"}</p>
-          </div>
-          
-          <div className="form-group">
-            <label className="form-label">{t.locationLabel}</label>
-            <div className="select-wrap">
-              <select 
-                className="form-select" 
-                value={formData.province} 
-                onChange={(e) => setFormData({...formData, province: e.target.value})}
-              >
-                <option value="">{t.locationAny}</option>
-                {t.locations.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
-              </select>
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">{t.budgetLabel}</label>
-            <div className="budget-grid">
-              {t.budgets.map(b => (
-                <div
-                  key={b.val}
-                  className={`budget-option ${formData.budget_range === b.val ? "selected" : ""}`}
-                  onClick={() => setFormData({...formData, budget_range: b.val})}
-                >
-                  <div className="amount">{b.amount}</div>
-                  <div className="label">{b.desc}</div>
-                </div>
               ))}
             </div>
+
+            <div className="section-title" style={{ marginTop: "2rem" }}>{t.s3Title}</div>
+            <div className="tag-cloud">
+              {t.interests.map((item) => (
+                <span
+                  key={item.val}
+                  className={`interest-tag${formData.interests.includes(item.val) ? " selected" : ""}`}
+                  onClick={() => toggleInterest(item.val)}
+                >
+                  {item.label}
+                </span>
+              ))}
+            </div>
+
+            <div className="section-title" style={{ marginTop: "2rem" }}>{lang === "en" ? "Preferences" : "ចំណូលចិត្ត"}</div>
+            <div className="exp-form-grid">
+              <div>
+                <label className="form-label" style={{ fontSize: "13px", color: "var(--text-secondary)", marginBottom: "4px", display: "block" }}>{t.locationLabel}</label>
+                <select 
+                  className="form-select" 
+                  value={formData.province} 
+                  onChange={(e) => setFormData({...formData, province: e.target.value})}
+                >
+                  <option value="">{t.locationAny}</option>
+                  {t.locations.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="form-label" style={{ fontSize: "13px", color: "var(--text-secondary)", marginBottom: "4px", display: "block" }}>{t.budgetLabel}</label>
+                <select 
+                  className="form-select" 
+                  value={formData.budget_range} 
+                  onChange={(e) => setFormData({...formData, budget_range: e.target.value})}
+                >
+                  <option value="">{lang === "en" ? "Any" : "ណាមួយក៏បាន"}</option>
+                  {t.budgets.map(b => <option key={b.val} value={b.val}>{b.amount} ({b.desc})</option>)}
+                </select>
+              </div>
+            </div>
+
+            {error && <div className="experience-status error" style={{ marginTop: "1.5rem" }}>{error}</div>}
+
+            <div className="step-nav" style={{ marginTop: "2rem" }}>
+              <div />
+              <button className="btn-submit" onClick={handleSubmit} disabled={isSubmitting}>
+                {isSubmitting ? (lang === "en" ? "Submitting..." : "កំពុងបញ្ជូន...") : (lang === "en" ? "Submit Survey" : "បញ្ជូនការស្ទង់មតិ")}
+              </button>
+            </div>
           </div>
+        )}
 
-          {error && <div className="experience-status error" style={{ marginTop: "1rem" }}>{error}</div>}
-
-          <div className="step-nav">
-            <button className="btn-back" onClick={handlePrev} disabled={isSubmitting}>← {t.back}</button>
-            <button className="btn-submit" onClick={handleSubmit} disabled={isSubmitting}>
-              {isSubmitting ? "..." : (lang === "en" ? "Submit Survey" : "បញ្ជូនការស្ទង់មតិ")}
-            </button>
-          </div>
-        </>
-      )}
-
-      {step === 5 && prediction && (
-        <>
-          <div className="step-heading" style={{ textAlign: "center" }}>
+        {step === 2 && prediction && (
+          <div className="experience-card" style={{ textAlign: "center", padding: "3rem 2rem" }}>
             <div style={{ fontSize: "48px", marginBottom: "16px" }}>🎉</div>
-            <h2>{lang === "en" ? "Thank You!" : "សូមអរគុណ!"}</h2>
-            <p className="sub">{lang === "en" ? "Your survey has been recorded." : "ការស្ទង់មតិរបស់អ្នកត្រូវបានរក្សាទុក។"}</p>
-          </div>
-          
-          <div className="experience-card" style={{ textAlign: "center", marginBottom: "2rem" }}>
-            <h3 style={{ color: "var(--primary)", fontSize: "1.1rem", marginBottom: "1rem" }}>
-              {lang === "en" ? "AI Prediction based on your data:" : "ការព្យាករណ៍ AI ផ្អែកលើទិន្នន័យរបស់អ្នក៖"}
-            </h3>
-            <div style={{ fontSize: "28px", fontWeight: "bold", margin: "10px 0" }}>{prediction.top_major}</div>
-            <p style={{ fontSize: "15px", color: "var(--text-secondary)", lineHeight: 1.6, marginTop: "1rem" }}>
-              {lang === "en" ? prediction.all_predictions[0].explanation_en : prediction.all_predictions[0].explanation_kh}
-            </p>
-          </div>
+            <h2 style={{ marginBottom: "8px", fontSize: "1.5rem" }}>{lang === "en" ? "Thank You!" : "សូមអរគុណ!"}</h2>
+            <p className="sub" style={{ marginBottom: "2rem" }}>{lang === "en" ? "Your survey has been recorded." : "ការស្ទង់មតិរបស់អ្នកត្រូវបានរក្សាទុក។"}</p>
+            
+            <div style={{ background: "var(--background-secondary)", padding: "2rem", borderRadius: "12px", marginBottom: "2rem" }}>
+              <h3 style={{ color: "var(--primary)", fontSize: "1.1rem", marginBottom: "1rem" }}>
+                {lang === "en" ? "AI Prediction based on your data:" : "ការព្យាករណ៍ AI ផ្អែកលើទិន្នន័យរបស់អ្នក៖"}
+              </h3>
+              <div style={{ fontSize: "28px", fontWeight: "bold", margin: "10px 0" }}>{prediction.top_major}</div>
+              <p style={{ fontSize: "15px", color: "var(--text-secondary)", lineHeight: 1.6, marginTop: "1rem" }}>
+                {lang === "en" ? prediction.all_predictions[0].explanation_en : prediction.all_predictions[0].explanation_kh}
+              </p>
+            </div>
 
-          <div className="step-nav" style={{ justifyContent: "center", flexDirection: "column", gap: "15px" }}>
-            <button className="btn-submit" onClick={handleDownloadResponse} style={{ background: "var(--primary-dark)" }}>
-              ⬇️ {lang === "en" ? "Download My Response (JSON)" : "ទាញយកចម្លើយរបស់ខ្ញុំ"}
-            </button>
-            <Link to="/" className="btn-back" style={{ textAlign: "center", textDecoration: "none" }}>
-              {lang === "en" ? "Return to Home" : "ត្រឡប់ទៅទំព័រដើម"}
-            </Link>
+            <div style={{ display: "flex", gap: "15px", justifyContent: "center", flexWrap: "wrap" }}>
+              <button className="btn-submit" onClick={handleDownloadResponse} style={{ background: "var(--primary-dark)" }}>
+                ⬇️ {lang === "en" ? "Download My Response (JSON)" : "ទាញយកចម្លើយរបស់ខ្ញុំ"}
+              </button>
+              <Link to="/" className="btn-back" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
+                {lang === "en" ? "Return to Home" : "ត្រឡប់ទៅទំព័រដើម"}
+              </Link>
+            </div>
           </div>
-        </>
-      )}
-    </div>
+        )}
+      </div>
+    </main>
   );
-};
-
-export default StudentSurveyPage;
+}
