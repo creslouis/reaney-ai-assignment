@@ -8,17 +8,16 @@ from app.models.base import Base
 
 settings = get_settings()
 
-connect_args: dict = {}
 _url = settings.database_url
 
-# Supabase / PgBouncer pooler: disable prepared statements
-if "pooler" in _url or "supabase.com" in _url:
-    connect_args["prepared_statement_name_func"] = lambda: f"__asyncpg_{uuid4().hex}__"
-    connect_args["statement_cache_size"] = 0
-
-# Supabase requires SSL
-if "supabase.com" in _url:
-    connect_args["ssl"] = "require"
+# Supabase requires statement_cache_size=0 regardless of whether the
+# direct (5432) or pooler (6543) connection string is used.
+# Also always require SSL for Supabase.
+connect_args: dict = {
+    "statement_cache_size": 0,
+    "prepared_statement_name_func": lambda: f"__asyncpg_{uuid4().hex}__",
+    "ssl": "require",
+}
 
 engine = create_async_engine(_url, echo=False, future=True, connect_args=connect_args)
 AsyncSessionLocal = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
