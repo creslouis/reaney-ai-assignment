@@ -71,19 +71,9 @@ async def seed_cms_if_needed() -> None:
 @app.on_event("startup")
 async def startup() -> None:
     await create_tables()
-
     predictor.load_models()
-
-    if not os.path.exists("ml/data/seed_dataset.csv"):
-        generate_seed_data(n_samples=300)
-
-    if not os.path.exists("ml/models/major_classifier.pkl"):
-        train_and_save(data_source="seed", triggered_by="startup")
-        predictor.load_models()
-
     await seed_university_data_if_needed()
     await seed_cms_if_needed()
-    await check_and_retrain_if_needed()
 
 
 Path("ml/models").mkdir(parents=True, exist_ok=True)
