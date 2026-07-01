@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -20,10 +20,12 @@ from app.models.survey_response import SurveyResponse
 from app.schemas.ml_prediction import MLPredictRequest, MLPredictResponse, MLStatusResponse
 from app.services.predictor_singleton import predictor
 from app.services.training_service import append_approved_experience_rows, export_survey_rows_to_csv, log_training_event
+from ml.training.csv_importer import import_csv_to_training_rows, save_uploaded_dataset
 from ml.training.evaluate_model import read_model_report
 from ml.training.train_model import train_and_save
 
 router = APIRouter(prefix="/ml", tags=["ml"])
+
 
 
 @router.post("/predict", response_model=MLPredictResponse)
@@ -118,6 +120,56 @@ async def retrain_model(db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=400, detail={"error": "Retrain failed", "message": str(exc)})
 
 
+@router.post("/upload-dataset", dependencies=[AdminAuth])
+async def upload_dataset(
+    file: UploadFile = File(...),
+    retrain_after: bool = True,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Upload a CSV or JSON file with survey data.
+    The file is mapped to the internal training format and appended to survey_data.csv.
+    If retrain_after=true (default), the model is retrained immediately after saving.
+    """
+    try:
+        allowed = {".csv", ".json", ".jsonl"}
+        suffix = Path(file.filename or "data.csv").suffix.lower()
+        if suffix not in allowed:
+            raise HTTPException(status_code=400, detail=f"File type '{suffix}' not supported. Upload CSV or JSON.")
+
+        content = await file.read()
+        if len(content) > 10 * 1024 * 1024:  # 10 MB max
+            raise HTTPException(status_code=413, detail="File too large (max 10 MB)")
+
+        df = import_csv_to_training_rows(content, file.filename or "data.csv")
+        total_rows = save_uploaded_dataset(df, merge=True)
+
+        result = {
+            "rows_uploaded": len(df),
+            "total_rows_in_dataset": total_rows,
+            "retrained": False,
+        }
+
+        if retrain_after:
+            new_meta = train_and_save(data_source="survey", triggered_by="upload")
+            await log_training_event(db, new_meta, triggered_by="upload")
+            predictor.load_models()
+            await db.commit()
+            result["retrained"] = True
+            result["new_accuracy"] = new_meta.get("accuracy", 0.0)
+            result["model_type"] = new_meta.get("model_type", "random_forest")
+            result["training_samples"] = new_meta.get("training_samples", 0)
+
+        return result
+
+    except HTTPException:
+        raise
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail={"error": "Dataset parse error", "message": str(exc)})
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail={"error": "Upload failed", "message": str(exc)})
+
+
 @router.get("/status", response_model=MLStatusResponse, dependencies=[AdminAuth])
 async def model_status():
     try:
@@ -142,3 +194,4 @@ async def model_evaluation():
         return read_model_report()
     except Exception as exc:
         raise HTTPException(status_code=400, detail={"error": "Evaluation fetch failed", "message": str(exc)})
+
