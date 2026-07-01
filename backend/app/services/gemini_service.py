@@ -73,7 +73,7 @@ class GeminiService:
 
     def _generate(self, prompt: str, fallback: str) -> str:
         if not self.available or self.model is None:
-            return fallback
+            return "[API ERROR] Gemini API Key is missing. self.available is False."
         try:
             resp = self.model.generate_content(prompt)
             text = getattr(resp, "text", "")

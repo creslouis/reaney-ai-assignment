@@ -9,7 +9,7 @@ class Settings(BaseSettings):
 
     database_url: str = Field(alias="DATABASE_URL")
 
-    gemini_api_key: str = Field(default="", alias="GEMINI_API_KEY")
+    gemini_api_key: str = Field(default="")
 
     admin_api_key: str = Field(default="", alias="ADMIN_API_KEY")
     survey_webhook_token: str = Field(default="", alias="SURVEY_WEBHOOK_TOKEN")
