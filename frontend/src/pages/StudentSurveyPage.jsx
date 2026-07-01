@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { apiFetch } from "../api";
+import { T } from "../data/translations";
 
 // Assuming we have some shared data for majors
 const MAJORS = [
@@ -26,7 +27,8 @@ const MAJORS = [
 ];
 
 const StudentSurveyPage = () => {
-  const { lang, t } = useApp();
+  const { lang } = useApp();
+  const t = T[lang];
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     study_track: "",
