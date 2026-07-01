@@ -78,8 +78,9 @@ class GeminiService:
             resp = self.model.generate_content(prompt)
             text = getattr(resp, "text", "")
             return text.strip() or fallback
-        except Exception:
-            return fallback
+        except Exception as e:
+            print("Gemini API Error:", e)
+            return f"[API ERROR] {str(e)}"
 
     def recommendation_summary(
         self,
