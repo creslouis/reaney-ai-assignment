@@ -23,11 +23,13 @@ def _to_float(value: Any, default: float = 0.0) -> float:
         return default
 
 
-def letter_grade_to_score(letter: str | float | int | None) -> float:
+def letter_grade_to_score(letter: str | float | int | None) -> float | None:
     if isinstance(letter, (float, int)):
         return float(letter)
+    if not letter:
+        return None
     mapping = {"A": 95, "B": 85, "C": 75, "D": 65, "E": 55, "F": 45}
-    return float(mapping.get(str(letter).upper(), 0))
+    return float(mapping.get(str(letter).upper(), None))
 
 
 def build_feature_vector(student_data: dict[str, Any]) -> dict[str, float]:
@@ -35,15 +37,31 @@ def build_feature_vector(student_data: dict[str, Any]) -> dict[str, float]:
     interests = student_data.get("interests", [])
     personality = student_data.get("personality", {})
 
-    math = letter_grade_to_score(grades.get("math"))
-    khmer = letter_grade_to_score(grades.get("khmer"))
-    english = letter_grade_to_score(grades.get("english"))
-    science = letter_grade_to_score(grades.get("science") or grades.get("earth"))
-    biology = letter_grade_to_score(grades.get("bio") or grades.get("biology"))
-    history = letter_grade_to_score(grades.get("history"))
-    geography = letter_grade_to_score(grades.get("geo") or grades.get("geography"))
-    physics = letter_grade_to_score(grades.get("physics"))
-    chemistry = letter_grade_to_score(grades.get("chem") or grades.get("chemistry"))
+    raw_scores = {
+        "math": letter_grade_to_score(grades.get("math")),
+        "khmer": letter_grade_to_score(grades.get("khmer")),
+        "english": letter_grade_to_score(grades.get("english")),
+        "science": letter_grade_to_score(grades.get("science") or grades.get("earth")),
+        "biology": letter_grade_to_score(grades.get("bio") or grades.get("biology")),
+        "history": letter_grade_to_score(grades.get("history")),
+        "geography": letter_grade_to_score(grades.get("geo") or grades.get("geography")),
+        "physics": letter_grade_to_score(grades.get("physics")),
+        "chemistry": letter_grade_to_score(grades.get("chem") or grades.get("chemistry")),
+    }
+
+    # Calculate average of provided grades to impute missing ones
+    valid_scores = [s for s in raw_scores.values() if s is not None]
+    avg_score = sum(valid_scores) / len(valid_scores) if valid_scores else 65.0
+
+    math = raw_scores["math"] or avg_score
+    khmer = raw_scores["khmer"] or avg_score
+    english = raw_scores["english"] or avg_score
+    science = raw_scores["science"] or avg_score
+    biology = raw_scores["biology"] or avg_score
+    history = raw_scores["history"] or avg_score
+    geography = raw_scores["geography"] or avg_score
+    physics = raw_scores["physics"] or avg_score
+    chemistry = raw_scores["chemistry"] or avg_score
 
     stem_avg = (math + science + physics + chemistry) / 4
     language_avg = (khmer + english) / 2
