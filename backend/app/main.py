@@ -45,12 +45,24 @@ app.include_router(experience.router, prefix="/api/v1")
 
 
 
+from sqlalchemy import text
+
 @app.get("/")
 async def root():
+    db_status = "ok"
+    try:
+        async with AsyncSessionLocal() as session:
+            await session.execute(text("SELECT 1"))
+    except Exception as e:
+        db_status = f"error: {str(e)}"
+
     return {
         "service": "career-finder-api", 
         "status": "ok", 
-        "ml_engine": "sklearn_models" if getattr(predictor, "ml_ready", False) else "rule_based_fallback"
+        "ml_engine": "sklearn_models" if getattr(predictor, "ml_ready", False) else "rule_based_fallback",
+        "gemini_api_configured": bool(settings.gemini_api_key),
+        "database_status": db_status,
+        "environment": settings.environment
     }
 
 
