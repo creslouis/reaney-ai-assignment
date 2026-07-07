@@ -47,7 +47,11 @@ app.include_router(experience.router, prefix="/api/v1")
 
 @app.get("/")
 async def root():
-    return {"service": "career-finder-api", "status": "ok"}
+    return {
+        "service": "career-finder-api", 
+        "status": "ok", 
+        "ml_engine": "sklearn_models" if getattr(predictor, "ml_ready", False) else "rule_based_fallback"
+    }
 
 
 async def check_and_retrain_if_needed() -> None:

@@ -1,0 +1,97 @@
+========================================
+  ReanEy — How to Run Locally
+========================================
+
+Prerequisites:
+  - Python 3.11+
+  - Node.js 18+ and npm
+  - Git
+  - A Supabase account (free tier works) for the PostgreSQL database
+  - A Google Gemini API key from https://aistudio.google.com
+  - (Optional) Google OAuth Client ID from Google Cloud Console
+
+========================================
+  STEP 1: Clone the repository
+========================================
+
+  git clone https://github.com/creslouis/reaney-ai-assignment.git
+  cd reaney-ai-assignment
+
+========================================
+  STEP 2: Set up the Backend
+========================================
+
+  cd backend
+
+  # Create a virtual environment
+  python -m venv .venv
+
+  # Activate the virtual environment
+  # On Linux/Mac:
+  source .venv/bin/activate
+  # On Windows:
+  .venv\Scripts\activate
+
+  # Install dependencies
+  pip install -r requirements.txt
+
+  # Create .env file from the example
+  cp .env.example .env
+
+  # Edit the .env file and fill in the required values:
+  #   DATABASE_URL        → Your Supabase PostgreSQL connection string
+  #                         Format: postgresql+asyncpg://postgres.[ref]:[password]@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres
+  #   GEMINI_API_KEY      → Your Google Gemini API key
+  #   ADMIN_API_KEY       → Any secret string you choose (for admin routes)
+  #   JWT_SECRET_KEY      → Generate with: python -c "import secrets; print(secrets.token_hex(32))"
+  #   JWT_REFRESH_SECRET_KEY → Generate with: python -c "import secrets; print(secrets.token_hex(32))"
+  #   FRONTEND_URL        → http://localhost:5173
+  #   GOOGLE_CLIENT_ID    → Your Google OAuth client ID (optional)
+
+  # Start the backend server
+  uvicorn app.main:app --reload
+
+  # The API will be running at: http://localhost:8000
+  # API docs available at:      http://localhost:8000/docs
+
+========================================
+  STEP 3: Set up the Frontend
+========================================
+
+  # Open a NEW terminal window
+  cd frontend
+
+  # Install dependencies
+  npm install
+
+  # Create .env file (for local development)
+  echo "VITE_API_BASE_URL=http://localhost:8000" > .env
+
+  # (Optional) Add Google OAuth Client ID
+  # echo "VITE_GOOGLE_CLIENT_ID=your_client_id" >> .env
+
+  # Start the frontend dev server
+  npm run dev
+
+  # The app will be running at: http://localhost:5173
+
+========================================
+  STEP 4: Open the App
+========================================
+
+  Open your browser and go to:
+    http://localhost:5173
+
+  The frontend will connect to the local backend at http://localhost:8000.
+
+========================================
+  Notes
+========================================
+
+  - The backend requires a running PostgreSQL database (Supabase).
+    Tables are auto-created on first startup.
+  - The ML model starts in "rule-based" mode and switches to ML mode
+    after enough survey data is collected.
+  - Make sure both backend and frontend are running simultaneously.
+
+========================================

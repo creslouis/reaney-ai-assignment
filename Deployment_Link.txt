@@ -1,0 +1,21 @@
+========================================
+  ReanEy — Deployment Links
+========================================
+
+Frontend (User View - Vercel):
+  https://reaney-ai-assignment.vercel.app
+
+Backend API (Render):
+  https://reaney.onrender.com
+
+Database (Supabase - PostgreSQL):
+  Hosted on Supabase (managed PostgreSQL)
+  Region: AWS ap-southeast-1 (Singapore)
+  Dashboard: https://supabase.com/dashboard
+  Note: Database is not publicly accessible.
+        It is accessed by the backend via a private connection string.
+
+API Documentation (Swagger):
+  https://reaney.onrender.com/docs
+
+========================================

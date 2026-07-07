@@ -28,3 +28,4 @@ class MLStatusResponse(BaseModel):
     training_samples: int
     last_trained: str | None
     is_ready: bool
+    ml_model_loaded: bool = False

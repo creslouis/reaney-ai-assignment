@@ -1,0 +1,103 @@
+========================================
+  ReanEy — How to Deploy
+========================================
+
+This project uses three services:
+  1. Supabase  — PostgreSQL database (free tier)
+  2. Render    — Backend API hosting (free tier)
+  3. Vercel    — Frontend hosting (free tier)
+
+========================================
+  PART 1: Set Up Supabase (Database)
+========================================
+
+  1. Go to https://supabase.com and create a free account.
+  2. Click "New Project" and choose a name and password.
+  3. Wait for the project to be created.
+  4. Go to Project Settings → Database → Connection string.
+  5. Copy the "URI" connection string (Transaction mode, port 6543).
+  6. Replace [YOUR-PASSWORD] in the string with your database password.
+  7. Change the prefix from "postgresql://" to "postgresql+asyncpg://"
+     Example:
+       postgresql+asyncpg://postgres.[ref]:[password]@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres
+
+  Save this connection string — you will need it for Render.
+
+========================================
+  PART 2: Deploy Backend on Render
+========================================
+
+  1. Go to https://render.com and sign up (connect your GitHub account).
+  2. Click "New" → "Web Service".
+  3. Connect your GitHub repository.
+  4. Configure the service:
+       - Name:           career-finder-api (or any name)
+       - Root Directory:  backend
+       - Runtime:         Python
+       - Build Command:   pip install --upgrade pip setuptools wheel && pip install -r requirements.txt
+       - Start Command:   uvicorn app.main:app --host 0.0.0.0 --port $PORT
+  5. Add Environment Variables (click "Add Environment Variable"):
+       - DATABASE_URL           → Your Supabase connection string (from Part 1)
+       - GEMINI_API_KEY         → Your Google Gemini API key
+       - ADMIN_API_KEY          → A secret key you create
+       - SURVEY_WEBHOOK_TOKEN   → A secret token you create
+       - FRONTEND_URL           → https://reaney-ai-assignment.vercel.app
+       - ENVIRONMENT            → production
+       - JWT_SECRET_KEY         → Generate with: openssl rand -hex 32
+       - JWT_REFRESH_SECRET_KEY → Generate with: openssl rand -hex 32
+       - GOOGLE_CLIENT_ID       → Your Google OAuth client ID
+       - GOOGLE_ALLOWED_ADMIN_EMAILS → Comma-separated admin email list
+  6. Click "Create Web Service".
+  7. Wait for the build to complete.
+  8. Your backend will be live at: https://your-service-name.onrender.com
+
+  Current deployment: https://reaney.onrender.com
+
+========================================
+  PART 3: Deploy Frontend on Vercel
+========================================
+
+  1. Go to https://vercel.com and sign up (connect your GitHub account).
+  2. Click "New Project" and import the repository.
+  3. Configure the project:
+       - Framework Preset:  Vite
+       - Root Directory:    frontend
+       - Build Command:     npm run build
+       - Output Directory:  dist
+  4. Add Environment Variables:
+       - VITE_API_BASE_URL    → https://reaney.onrender.com (your Render URL)
+       - VITE_GOOGLE_CLIENT_ID → Your Google OAuth client ID
+  5. Click "Deploy".
+  6. Your frontend will be live at your Vercel URL.
+
+  Current deployment: https://reaney-ai-assignment.vercel.app
+
+========================================
+  PART 4: Verify Deployment
+========================================
+
+  1. Open the Vercel frontend URL in your browser.
+  2. Check that the wizard loads and you can navigate through steps.
+  3. Test the backend API docs at: https://your-render-url.onrender.com/docs
+  4. Test the chatbot to verify the Gemini API key works.
+
+========================================
+  Troubleshooting
+========================================
+
+  - "502 Bad Gateway" on Render:
+      The free tier sleeps after 15 minutes of inactivity.
+      First request after sleep takes 30-60 seconds to wake up.
+
+  - "Failed to fetch" on frontend:
+      Make sure VITE_API_BASE_URL matches the Render URL exactly
+      (no trailing slash).
+
+  - Database connection error:
+      Double-check DATABASE_URL uses "postgresql+asyncpg://" prefix
+      and the correct password.
+
+  - CORS errors:
+      Make sure FRONTEND_URL on Render matches your Vercel URL exactly.
+
+========================================

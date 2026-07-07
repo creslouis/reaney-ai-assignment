@@ -173,12 +173,14 @@ async def upload_dataset(
 @router.get("/status", response_model=MLStatusResponse, dependencies=[AdminAuth])
 async def model_status():
     try:
+        ml_ready = getattr(predictor, "ml_ready", False)
         return MLStatusResponse(
             model_type=predictor.metadata.get("model_type", "rule_based_v2"),
             accuracy=float(predictor.metadata.get("accuracy", 1.0)),
             training_samples=int(predictor.metadata.get("training_samples", 0)),
-            last_trained=None,
+            last_trained=predictor.metadata.get("training_date"),
             is_ready=True,
+            ml_model_loaded=ml_ready,
         )
     except Exception as exc:
         raise HTTPException(status_code=400, detail={"error": "Status fetch failed", "message": str(exc)})
@@ -187,15 +189,31 @@ async def model_status():
 @router.get("/evaluation", dependencies=[AdminAuth])
 async def model_evaluation():
     try:
+        report = read_model_report()
+        if not report.get("ready", False):
+            # No trained model yet — return rule-based defaults
+            return {
+                "model_type": "rule_based_v2",
+                "accuracy": None,
+                "precision": None,
+                "recall": None,
+                "f1": None,
+                "top3_accuracy": None,
+                "training_date": None,
+                "comparison": [],
+                "note": "No trained model found. Upload training data and click Retrain to train the ML model.",
+            }
         return {
-            "model_type": "rule_based_v2",
-            "accuracy": 1.0,
-            "precision": 1.0,
-            "recall": 1.0,
-            "f1": 1.0,
-            "top3_accuracy": 1.0,
-            "training_date": "Rule Based Engine",
-            "comparison": []
+            "model_type": report.get("model_type", "random_forest"),
+            "accuracy": report.get("accuracy"),
+            "precision": report.get("precision"),
+            "recall": report.get("recall"),
+            "f1": report.get("f1"),
+            "top3_accuracy": report.get("top3_accuracy"),
+            "training_date": report.get("training_date"),
+            "training_samples": report.get("training_samples"),
+            "data_source": report.get("data_source"),
+            "comparison": report.get("comparison", []),
         }
     except Exception as exc:
         raise HTTPException(status_code=400, detail={"error": "Evaluation fetch failed", "message": str(exc)})
