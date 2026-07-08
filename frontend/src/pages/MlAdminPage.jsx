@@ -1,13 +1,15 @@
 import { useRef, useState } from "react";
 import { useApp } from "../context/AppContext";
 import { T } from "../data/translations";
-import { apiFetch, authHeaders, getStoredAdminToken } from "../api";
+import { authHeaders } from "../api";
 
 export default function MlAdminPage() {
-  const { lang } = useApp();
+  const { lang, adminRequest, adminToken } = useApp();
   const t = T[lang];
   const [status, setStatus] = useState(null);
   const [evaluation, setEvaluation] = useState(null);
+  const [verification, setVerification] = useState(null);
+  const [verifyLoading, setVerifyLoading] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [actionMessage, setActionMessage] = useState("");
@@ -22,18 +24,15 @@ export default function MlAdminPage() {
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef(null);
 
-  const token = getStoredAdminToken();
-
   const loadData = async () => {
     setLoading(true);
     setError("");
     setActionMessage("");
     try {
-      const headers = authHeaders(token);
       const [statusData, evaluationData, surveyData] = await Promise.all([
-        apiFetch("/api/v1/ml/status", { headers }),
-        apiFetch("/api/v1/ml/evaluation", { headers }),
-        apiFetch("/api/v1/hs-survey/stats", { headers }).catch(() => null),
+        adminRequest("/api/v1/ml/status"),
+        adminRequest("/api/v1/ml/evaluation"),
+        adminRequest("/api/v1/hs-survey/stats").catch(() => null),
       ]);
       setStatus(statusData);
       setEvaluation(evaluationData);
@@ -46,8 +45,9 @@ export default function MlAdminPage() {
 
   const exportSurveys = async () => {
     try {
-      const response = await fetch("/api/v1/hs-survey/export", {
-        headers: authHeaders(token)
+      const base = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+      const response = await fetch(`${base}/api/v1/hs-survey/export`, {
+        headers: authHeaders(adminToken)
       });
       if (!response.ok) {
         throw new Error("Failed to export surveys");
@@ -70,9 +70,8 @@ export default function MlAdminPage() {
     setError("");
     setActionMessage("");
     try {
-      const data = await apiFetch("/api/v1/ml/retrain", {
+      const data = await adminRequest("/api/v1/ml/retrain", {
         method: "POST",
-        headers: authHeaders(token),
       });
       setActionMessage(`Retrained! Accuracy: ${Math.round((data.new_accuracy || 0) * 100)}% | Samples: ${data.training_samples}`);
       await loadData();
@@ -80,6 +79,18 @@ export default function MlAdminPage() {
       setError(e.message || t.adminRetrainError);
       setLoading(false);
     }
+  };
+
+  const runVerification = async (mode) => {
+    setVerifyLoading(mode);
+    setError("");
+    try {
+      const data = await adminRequest(`/api/v1/ml/verify?mode=${mode}`);
+      setVerification(data);
+    } catch (e) {
+      setError(e.message || "Verification failed");
+    }
+    setVerifyLoading("");
   };
 
   const handleFileDrop = (e) => {
@@ -114,7 +125,7 @@ export default function MlAdminPage() {
       const url = `${base}/api/v1/ml/upload-dataset?retrain_after=${retrainAfter}`;
       const res = await fetch(url, {
         method: "POST",
-        headers: authHeaders(token),
+        headers: authHeaders(adminToken),
         body: formData,
       });
       const data = await res.json().catch(() => null);
@@ -137,6 +148,54 @@ export default function MlAdminPage() {
         <div className="step-heading">
           <h2>{t.adminMlTitle}</h2>
           <p className="sub">{t.adminMlSub}</p>
+        </div>
+
+        <div className="experience-card" style={{ marginBottom: "1.5rem" }}>
+          <div className="step-heading" style={{ marginBottom: "1rem" }}>
+            <h3 style={{ fontSize: "1.1rem", fontWeight: 600 }}>System Verification</h3>
+            <p className="sub">Run consistency checks for database, ML runtime, major mappings, and Gemini.</p>
+          </div>
+
+          <div className="admin-toolbar">
+            <div className="admin-button-group">
+              <button className="btn-submit" onClick={() => runVerification("shallow")} disabled={!!verifyLoading}>
+                {verifyLoading === "shallow" ? "Checking..." : "Run Quick Check"}
+              </button>
+              <button className="btn-primary-sm" onClick={() => runVerification("deep")} disabled={!!verifyLoading}>
+                {verifyLoading === "deep" ? "Checking..." : "Run Deep Check"}
+              </button>
+            </div>
+          </div>
+
+          {verification && (
+            <div className="admin-list">
+              <div className="admin-stats">
+                <div className="meta-chip">Status: {verification.status}</div>
+                <div className="meta-chip">Mode: {verification.mode}</div>
+                <div className="meta-chip">Predictor: {verification.summary?.predictor_mode || "-"}</div>
+              </div>
+
+              {!!verification.summary?.failed_checks?.length && (
+                <div className="experience-status error" style={{ marginTop: "1rem" }}>
+                  Failed checks: {verification.summary.failed_checks.join(", ")}
+                </div>
+              )}
+
+              {Object.entries(verification.checks || {}).map(([name, check]) => (
+                <div className="result-card open" key={name} style={{ marginTop: "1rem" }}>
+                  <div className="result-card-header" style={{ cursor: "default" }}>
+                    <div className={`rank-badge ${check.ok ? "rank-1" : "rank-other"}`}>{check.ok ? "OK" : "!"}</div>
+                    <div className="result-info">
+                      <div className="result-major">{name.replace(/_/g, " ")}</div>
+                      <div className="why-text" style={{ marginTop: "0.4rem", whiteSpace: "pre-wrap" }}>
+                        {JSON.stringify(check, null, 2)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Status / Retrain card */}

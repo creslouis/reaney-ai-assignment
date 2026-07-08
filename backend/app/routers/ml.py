@@ -19,6 +19,7 @@ from app.models.student import Student
 from app.models.survey_response import SurveyResponse
 from app.schemas.ml_prediction import MLPredictRequest, MLPredictResponse, MLStatusResponse
 from app.services.predictor_singleton import predictor
+from app.services.system_verify_service import verify_system
 from app.services.training_service import append_approved_experience_rows, export_survey_rows_to_csv, log_training_event
 from ml.training.csv_importer import import_csv_to_training_rows, save_uploaded_dataset
 from ml.training.evaluate_model import read_model_report
@@ -218,3 +219,11 @@ async def model_evaluation():
     except Exception as exc:
         raise HTTPException(status_code=400, detail={"error": "Evaluation fetch failed", "message": str(exc)})
 
+
+@router.get("/verify", dependencies=[AdminAuth])
+async def verify_runtime(mode: str = "shallow", db: AsyncSession = Depends(get_db)):
+    try:
+        selected_mode = mode if mode in {"shallow", "deep"} else "shallow"
+        return await verify_system(db, mode=selected_mode)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail={"error": "Verification failed", "message": str(exc)})
