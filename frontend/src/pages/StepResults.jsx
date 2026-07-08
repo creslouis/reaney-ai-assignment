@@ -8,7 +8,7 @@ export default function StepResults() {
   const t = T[lang];
 
   const strandLabel = lang === "km"
-    ? { science: "វិទ្យាសាស្ត្រ", social: "សង្គមវិទ្យា" }[strand]
+    ? { science: "វិទ្យាសាស្ត្រ", social: "វិទ្យាសាស្ត្រសង្គម" }[strand]
     : { science: "Science", social: "Social Science" }[strand];
 
   return (

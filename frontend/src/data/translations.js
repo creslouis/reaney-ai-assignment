@@ -10,7 +10,7 @@ export const T = {
     login: "ចូល", register: "ចុះឈ្មោះ", saveResults: "💾 រក្សាលទ្ធផល",
     stepStrand: "ផ្នែក", stepBacStatus: "ស្ថានភាព", stepGrades: "និទ្ទេស", stepInterests: "ចំណាប់អារម្មណ៍", stepPrefs: "ចំណូលចិត្ត", stepResults: "លទ្ធផល",
     s1Title: "តើអ្នកនៅក្នុងផ្នែកអ្វីនៃ BAC II?", s1Sub: "ជ្រើសរើសផ្នែកដែលអ្នករៀននៅថ្នាក់ទី១២",
-    strandScience: "វិទ្យាសាស្ត្រ", strandSocial: "សង្គមវិទ្យា", nextGrades: "បន្ទាប់: បញ្ចូលថ្នាក់",
+    strandScience: "វិទ្យាសាស្ត្រ", strandSocial: "វិទ្យាសាស្ត្រសង្គម", nextGrades: "បន្ទាប់: បញ្ចូលថ្នាក់",
         // Step 1.5 — BAC status
     s1bTitle: "តើអ្នកបានប្រឡង BAC II រួចហើយឬនៅ?",
     s1bSub: "ចម្លើយរបស់អ្នកនឹងជួយយើងតម្រង់ការណែនាំឱ្យស្រប",

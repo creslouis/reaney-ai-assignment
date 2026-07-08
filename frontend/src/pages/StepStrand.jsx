@@ -8,7 +8,7 @@ export default function StepStrand() {
 
   const strands = [
     { id: "science", emoji: "🔬", label: t.strandScience, sub: "វិទ្យាសាស្ត្រ" },
-    { id: "social",  emoji: "🌏", label: t.strandSocial,  sub: "សង្គមវិទ្យា" },
+    { id: "social",  emoji: "🌏", label: t.strandSocial,  sub: "វិទ្យាសាស្ត្រសង្គម" },
   ];
 
   return (
