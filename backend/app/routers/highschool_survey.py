@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+import io
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-import io
 
 from app.database import get_db
 from app.middleware.auth import AdminAuth
@@ -107,12 +108,12 @@ async def submit_hs_survey(payload: HighschoolSurveyRequest, db: AsyncSession = 
 @router.get("/stats", dependencies=[AdminAuth])
 async def get_hs_survey_stats(db: AsyncSession = Depends(get_db)):
     try:
-        total_surveys = await db.scalar(select(db.func.count(HighschoolSurvey.id)))
+        total_surveys = await db.scalar(select(func.count()).select_from(HighschoolSurvey))
         threshold = 300
         return {
-            "total_surveys": total_surveys,
+            "total_surveys": total_surveys or 0,
             "threshold": threshold,
-            "ready_for_export": total_surveys >= threshold,
+            "ready_for_export": (total_surveys or 0) >= threshold,
         }
     except Exception as exc:
         raise HTTPException(status_code=400, detail={"error": "Failed to fetch stats", "message": str(exc)})

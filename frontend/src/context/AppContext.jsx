@@ -55,9 +55,20 @@ export function AppProvider({ children }) {
     let active = true;
     apiFetch("/api/v1/auth/me", { headers: authHeaders(adminToken) })
       .then((data) => { if (active) setAdminUser(data); })
-      .catch(() => {
-        // Token is invalid – clear it
-        if (active) {
+      .catch(async (error) => {
+        if (!active) return;
+        if (error?.status === 401 && adminRefreshToken) {
+          try {
+            const refreshed = await refreshAdminSession();
+            if (refreshed?.user && active) {
+              setAdminUser(refreshed.user);
+              return;
+            }
+          } catch {
+            // Fall through and clear invalid session state.
+          }
+        }
+        if (error?.status === 401) {
           setStoredAdminToken("");
           setStoredRefreshToken("");
           setAdminTokenState("");
@@ -113,13 +124,13 @@ export function AppProvider({ children }) {
     try {
       return await request(adminToken);
     } catch (error) {
-      if (!adminRefreshToken) throw error;
+      if (error?.status !== 401 || !adminRefreshToken) throw error;
       try {
         const refreshed = await refreshAdminSession();
         return await request(refreshed?.access_token || getStoredAdminToken());
-      } catch {
+      } catch (refreshError) {
         await logoutAdmin();
-        throw error;
+        throw refreshError;
       }
     }
   };

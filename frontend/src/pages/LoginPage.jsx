@@ -16,6 +16,7 @@ export default function LoginPage() {
   const [mode, setMode] = useState("login"); // "login" | "register"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
   const [status, setStatus] = useState({ msg: "", type: "" });
   const [loading, setLoading] = useState(false);
@@ -141,16 +142,37 @@ export default function LoginPage() {
             required
             autoComplete="email"
           />
-          <input
-            className="form-input"
-            type="password"
-            placeholder={t.authPasswordPlaceholder}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            autoComplete={mode === "login" ? "current-password" : "new-password"}
-            minLength={mode === "register" ? 8 : undefined}
-          />
+          <div style={{ position: "relative" }}>
+            <input
+              className="form-input"
+              type={showPassword ? "text" : "password"}
+              placeholder={t.authPasswordPlaceholder}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete={mode === "login" ? "current-password" : "new-password"}
+              minLength={mode === "register" ? 8 : undefined}
+              style={{ paddingRight: "3rem" }}
+            />
+            <button
+              type="button"
+              className="btn-ghost"
+              onClick={() => setShowPassword((value) => !value)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              style={{
+                position: "absolute",
+                right: "0.5rem",
+                top: "50%",
+                transform: "translateY(-50%)",
+                border: "none",
+                background: "transparent",
+                padding: "0.25rem 0.5rem",
+                minWidth: "auto",
+              }}
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
 
           {status.msg && (
             <div className={`experience-status ${status.type}`} style={{ marginBottom: "0.5rem" }}>
