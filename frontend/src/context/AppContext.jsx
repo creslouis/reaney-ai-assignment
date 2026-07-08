@@ -40,6 +40,7 @@ export function AppProvider({ children }) {
         setCmsBundle(data);
         const colors = data?.settings?.["theme.colors"] || {};
         Object.entries(colors).forEach(([key, value]) => {
+          if (key.startsWith("primary")) return;
           document.documentElement.style.setProperty(`--${key.replace(/_/g, "-")}`, value);
         });
       })
