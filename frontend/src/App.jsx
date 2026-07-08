@@ -44,50 +44,52 @@ function AppRoutes() {
     <>
       <Topbar />
       {isWizard && <ProgressBar />}
-      <Routes>
-        {/* Public routes */}
-        <Route path="/" element={<WizardRouter />} />
-        <Route path="/experience" element={<ExperiencePage />} />
-        <Route path="/survey" element={<StudentSurveyPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/legal/:slug" element={<LegalPage />} />
+      <div className="app-content">
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<WizardRouter />} />
+          <Route path="/experience" element={<ExperiencePage />} />
+          <Route path="/survey" element={<StudentSurveyPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/legal/:slug" element={<LegalPage />} />
 
-        {/* Admin-only routes – protected */}
-        <Route
-          path="/admin/experience"
-          element={
-            <ProtectedRoute requiredRole="admin">
-              <ExperienceAdminPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/ml"
-          element={
-            <ProtectedRoute requiredRole="admin">
-              <MlAdminPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/universities"
-          element={
-            <ProtectedRoute requiredRole="admin">
-              <UniversityAdminPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin/cms"
-          element={
-            <ProtectedRoute requiredRole="admin">
-              <CmsAdminPage />
-            </ProtectedRoute>
-          }
-        />
+          {/* Admin-only routes – protected */}
+          <Route
+            path="/admin/experience"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <ExperienceAdminPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/ml"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <MlAdminPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/universities"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <UniversityAdminPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/cms"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <CmsAdminPage />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
       <Footer />
       <Modal />
     </>
